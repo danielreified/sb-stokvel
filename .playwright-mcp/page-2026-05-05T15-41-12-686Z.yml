@@ -1,0 +1,15 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "Welcome back" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Sign in to your stokvel
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: Mobile number
+      - textbox "Mobile number" [active] [ref=e11]:
+        - /placeholder: +27 8X XXX XXXX
+        - text: "+27"
+    - generic [ref=e12]:
+      - generic [ref=e13]: PIN
+      - textbox "PIN" [ref=e14]:
+        - /placeholder: ••••
+    - button "Sign in" [ref=e15] [cursor=pointer]

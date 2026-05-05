@@ -3,7 +3,9 @@ import { setLastRequestId } from './logger.js';
 
 export const api = createApiClient({
   onUnauthorized: () => {
-    // Lazy import avoids circular: api → sign-out → api
+    // Only trigger signOut when a previously-authenticated session expires.
+    // If we're already on /login, a 401 is expected — don't loop.
+    if (window.location.pathname === '/login') return;
     import('../features/auth/sign-out.js').then(({ signOut }) => signOut());
   },
   onVersionHeaders: (headers) => {

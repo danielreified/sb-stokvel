@@ -10,6 +10,7 @@ import { importSessionKey } from '../../lib/crypto/aes-gcm.js';
 import { keyStore } from '../../lib/crypto/key-store.js';
 import { logger } from '../../lib/logger.js';
 import { queryClient } from '../../lib/query-client.js';
+import { meQueryOptions } from './queries.js';
 
 export function useLogin(redirectTo?: string) {
   const form = useForm<LoginInput>({
@@ -22,10 +23,9 @@ export function useLogin(redirectTo?: string) {
       const data = await api.auth.login(values);
       const key = await importSessionKey(data.sessionKey);
       keyStore.setKey(key);
-      // Invalidate router so _authed beforeLoad re-checks auth context
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
-      await router.invalidate();
-      window.location.href = redirectTo ?? '/_authed/dashboard';
+      // Seed the me cache immediately so _authed beforeLoad finds it synchronously
+      queryClient.setQueryData(meQueryOptions.queryKey, data);
+      await router.navigate({ to: redirectTo ?? '/dashboard', replace: true });
     } catch (err) {
       let message: string = copy.auth.unknownError;
       if (err instanceof ApiClientError) {

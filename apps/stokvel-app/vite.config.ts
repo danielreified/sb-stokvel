@@ -13,7 +13,8 @@ export default defineConfig((_env) => ({
       generatedRouteTree: 'src/routeTree.gen.ts',
     }),
     react(),
-    mkcert(),
+    // HTTPS=true enables mkcert (needed for real-device LAN testing); localhost works without it
+    ...(process.env.HTTPS === 'true' ? [mkcert()] : []),
     VitePWA({
       registerType: 'prompt',
       // skipWaiting + clientsClaim both false — banking context, no surprise reloads

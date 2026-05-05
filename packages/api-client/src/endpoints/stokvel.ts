@@ -18,8 +18,11 @@ export function createStokvelEndpoints(request: RequestFn) {
       stokvelId: StokvelId,
       params?: ContributionListParams,
     ): Promise<Contribution[]> => {
-      const qs = params
-        ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
+      const defined = params
+        ? Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined))
+        : {};
+      const qs = Object.keys(defined).length
+        ? `?${new URLSearchParams(defined as Record<string, string>).toString()}`
         : '';
       return request('GET', `/api/stokvel/${stokvelId}/contributions${qs}`);
     },

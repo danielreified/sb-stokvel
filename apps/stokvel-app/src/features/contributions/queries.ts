@@ -10,9 +10,14 @@ export interface ContributionFilters {
 export const contributionsQueryOptions = (
   stokvelId: StokvelId,
   filters: ContributionFilters = {},
-) =>
-  queryOptions({
-    queryKey: ['contributions', stokvelId, filters],
+) => {
+  // Strip undefined values so { month: undefined } and {} produce the same cache key
+  const normFilters = Object.fromEntries(
+    Object.entries(filters).filter(([, v]) => v !== undefined),
+  );
+  return queryOptions({
+    queryKey: ['contributions', stokvelId, normFilters],
     queryFn: () => api.stokvel.contributions(stokvelId, filters),
     staleTime: 5 * 60 * 1000,
   });
+};

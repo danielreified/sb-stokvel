@@ -1,0 +1,16 @@
+- generic [ref=e16]:
+  - heading "Ubuntu Stokvel" [level=1] [ref=e17]
+  - generic [ref=e18]:
+    - paragraph [ref=e19]: Total balance
+    - paragraph [ref=e20]: R 11 500,00
+    - paragraph [ref=e21]: Reconciled 5 days ago
+  - generic [ref=e22]:
+    - generic [ref=e23]:
+      - paragraph [ref=e24]: Monthly target
+      - paragraph [ref=e25]: R 500,00
+    - generic [ref=e26]:
+      - paragraph [ref=e27]: Members
+      - paragraph [ref=e28]: 8 members
+  - generic [ref=e29]:
+    - paragraph [ref=e30]: Rules
+    - paragraph [ref=e31]: Monthly contribution of R500. Payout rotates monthly. Missed contribution = penalty.
