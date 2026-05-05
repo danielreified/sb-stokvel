@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedMembersRouteImport } from './routes/_authed/members'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedProfileRoute = AuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedMembersRoute = AuthedMembersRouteImport.update({
   id: '/members',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/contributions': typeof AuthedContributionsRouteWithChildren
   '/dashboard': typeof AuthedDashboardRoute
   '/members': typeof AuthedMembersRoute
+  '/profile': typeof AuthedProfileRoute
   '/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/contributions': typeof AuthedContributionsRouteWithChildren
   '/dashboard': typeof AuthedDashboardRoute
   '/members': typeof AuthedMembersRoute
+  '/profile': typeof AuthedProfileRoute
   '/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRoutesById {
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/_authed/contributions': typeof AuthedContributionsRouteWithChildren
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/members': typeof AuthedMembersRoute
+  '/_authed/profile': typeof AuthedProfileRoute
   '/_authed/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRouteTypes {
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
     | '/contributions'
     | '/dashboard'
     | '/members'
+    | '/profile'
     | '/contributions/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/contributions'
     | '/dashboard'
     | '/members'
+    | '/profile'
     | '/contributions/new'
   id:
     | '__root__'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/_authed/contributions'
     | '/_authed/dashboard'
     | '/_authed/members'
+    | '/_authed/profile'
     | '/_authed/contributions/new'
   fileRoutesById: FileRoutesById
 }
@@ -134,6 +146,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/profile': {
+      id: '/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthedProfileRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/members': {
       id: '/_authed/members'
@@ -181,12 +200,14 @@ interface AuthedRouteChildren {
   AuthedContributionsRoute: typeof AuthedContributionsRouteWithChildren
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedMembersRoute: typeof AuthedMembersRoute
+  AuthedProfileRoute: typeof AuthedProfileRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedContributionsRoute: AuthedContributionsRouteWithChildren,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedMembersRoute: AuthedMembersRoute,
+  AuthedProfileRoute: AuthedProfileRoute,
 }
 
 const AuthedRouteWithChildren =

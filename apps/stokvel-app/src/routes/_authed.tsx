@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { ForcedUpdateGate } from '../components/ForcedUpdateGate.js';
+import { OfflineBanner } from '../components/OfflineBanner.js';
 import { RecommendedUpdateBanner } from '../components/RecommendedUpdateBanner.js';
 
 /**
@@ -24,6 +25,7 @@ function AuthedLayout() {
   return (
     <ForcedUpdateGate>
       <RecommendedUpdateBanner />
+      <OfflineBanner />
       <Outlet />
     </ForcedUpdateGate>
   );
