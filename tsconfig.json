@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@seyva/types": ["./packages/types/src/index.ts"],
+      "@seyva/validation": ["./packages/validation/src/index.ts"],
+      "@seyva/utils": ["./packages/utils/src/index.ts"],
+      "@seyva/api-client": ["./packages/api-client/src/index.ts"],
+      "@seyva/ui": ["./packages/ui/src/index.ts"]
+    },
+    "noEmit": true
+  },
+  "include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"]
+}
