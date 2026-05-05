@@ -1,5 +1,5 @@
 import { toStokvelId } from '@seyva/types';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet, useChildMatches } from '@tanstack/react-router';
 import { Suspense } from 'react';
 import { z } from 'zod';
 import { copy } from '../../copy/index.js';
@@ -25,10 +25,23 @@ export const Route = createFileRoute('/_authed/contributions')({
 
 function ContributionsPage() {
   const { month, memberId } = Route.useSearch();
+  const childMatches = useChildMatches();
+
+  if (childMatches.length > 0) {
+    return <Outlet />;
+  }
 
   return (
     <div className="space-y-2 p-4">
-      <h1 className="text-xl font-bold text-gray-900">{copy.contributions.pageTitle}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-gray-900">{copy.contributions.pageTitle}</h1>
+        <Link
+          to="/contributions/new"
+          className="rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white"
+        >
+          + {copy.contributions.makeContributionButton}
+        </Link>
+      </div>
       <Suspense fallback={<DashboardSkeleton />}>
         <ContributionsView stokvelId={DEMO_STOKVEL_ID} filters={{ month, memberId }} />
       </Suspense>
