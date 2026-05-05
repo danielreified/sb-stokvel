@@ -8,7 +8,7 @@
     "build": "vite build && bun scripts/check-bundle-size.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "generate-icons": "bun scripts/generate-icons.ts"
   },
   "dependencies": {

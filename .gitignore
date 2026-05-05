@@ -34,3 +34,6 @@ bun-debug.log*
 
 # Claude Code state
 .claude/
+
+# Playwright MCP snapshots
+.playwright-mcp/
