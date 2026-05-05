@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedMembersRouteImport } from './routes/_authed/members'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
+import { Route as AuthedContributionsNewRouteImport } from './routes/_authed/contributions.new'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -45,35 +46,55 @@ const AuthedContributionsRoute = AuthedContributionsRouteImport.update({
   path: '/contributions',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedContributionsNewRoute = AuthedContributionsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthedContributionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/contributions': typeof AuthedContributionsRoute
+  '/contributions': typeof AuthedContributionsRouteWithChildren
   '/dashboard': typeof AuthedDashboardRoute
   '/members': typeof AuthedMembersRoute
+  '/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/contributions': typeof AuthedContributionsRoute
+  '/contributions': typeof AuthedContributionsRouteWithChildren
   '/dashboard': typeof AuthedDashboardRoute
   '/members': typeof AuthedMembersRoute
+  '/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authed/contributions': typeof AuthedContributionsRoute
+  '/_authed/contributions': typeof AuthedContributionsRouteWithChildren
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/members': typeof AuthedMembersRoute
+  '/_authed/contributions/new': typeof AuthedContributionsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/contributions' | '/dashboard' | '/members'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/contributions'
+    | '/dashboard'
+    | '/members'
+    | '/contributions/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/contributions' | '/dashboard' | '/members'
+  to:
+    | '/'
+    | '/login'
+    | '/contributions'
+    | '/dashboard'
+    | '/members'
+    | '/contributions/new'
   id:
     | '__root__'
     | '/'
@@ -82,6 +103,7 @@ export interface FileRouteTypes {
     | '/_authed/contributions'
     | '/_authed/dashboard'
     | '/_authed/members'
+    | '/_authed/contributions/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -134,17 +156,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedContributionsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/contributions/new': {
+      id: '/_authed/contributions/new'
+      path: '/new'
+      fullPath: '/contributions/new'
+      preLoaderRoute: typeof AuthedContributionsNewRouteImport
+      parentRoute: typeof AuthedContributionsRoute
+    }
   }
 }
 
+interface AuthedContributionsRouteChildren {
+  AuthedContributionsNewRoute: typeof AuthedContributionsNewRoute
+}
+
+const AuthedContributionsRouteChildren: AuthedContributionsRouteChildren = {
+  AuthedContributionsNewRoute: AuthedContributionsNewRoute,
+}
+
+const AuthedContributionsRouteWithChildren =
+  AuthedContributionsRoute._addFileChildren(AuthedContributionsRouteChildren)
+
 interface AuthedRouteChildren {
-  AuthedContributionsRoute: typeof AuthedContributionsRoute
+  AuthedContributionsRoute: typeof AuthedContributionsRouteWithChildren
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedMembersRoute: typeof AuthedMembersRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedContributionsRoute: AuthedContributionsRoute,
+  AuthedContributionsRoute: AuthedContributionsRouteWithChildren,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedMembersRoute: AuthedMembersRoute,
 }
