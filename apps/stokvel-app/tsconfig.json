@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "paths": {
+      "@seyva/types": ["../../packages/types/src/index.ts"],
+      "@seyva/validation": ["../../packages/validation/src/index.ts"],
+      "@seyva/utils": ["../../packages/utils/src/index.ts"],
+      "@seyva/api-client": ["../../packages/api-client/src/index.ts"],
+      "@seyva/ui": ["../../packages/ui/src/index.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "../../packages/types/src",
+    "../../packages/validation/src",
+    "../../packages/utils/src",
+    "../../packages/api-client/src",
+    "../../packages/ui/src"
+  ]
+}
