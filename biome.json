@@ -16,7 +16,8 @@
       "!**/.vite",
       "!**/coverage",
       "!**/routeTree.gen.ts",
-      "!bun.lock"
+      "!bun.lock",
+      "!packages/ui/src/components"
     ]
   },
   "formatter": {
