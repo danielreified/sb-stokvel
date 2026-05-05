@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { UpdatePrompt } from '../components/UpdatePrompt.js';
 import { copy } from '../copy/index.js';
 import type { AuthState } from '../features/auth/types.js';
 
@@ -14,7 +15,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <UpdatePrompt />
+    </>
+  );
 }
 
 function RootErrorComponent({ error }: { error: unknown }) {
