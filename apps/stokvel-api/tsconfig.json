@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun-types"],
+    "paths": {
+      "@seyva/types": ["../../packages/types/src/index.ts"],
+      "@seyva/validation": ["../../packages/validation/src/index.ts"],
+      "@seyva/utils": ["../../packages/utils/src/index.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "../../packages/types/src",
+    "../../packages/validation/src",
+    "../../packages/utils/src"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@seyva/stokvel-api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@seyva/types": "workspace:*",
+    "@seyva/utils": "workspace:*",
+    "@seyva/validation": "workspace:*",
+    "hono": "^4.7.11",
+    "semver": "^7.7.2",
+    "ua-parser-js": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.7.0",
+    "@types/ua-parser-js": "^0.7.39",
+    "bun-types": "^1.2.0"
+  }
+}

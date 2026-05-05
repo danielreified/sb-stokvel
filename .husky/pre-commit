@@ -8,10 +8,16 @@ if [ -d apps/stokvel-app/src/routes ]; then
   git add apps/stokvel-app/src/routeTree.gen.ts 2>/dev/null || true
 fi
 
-# 2. Typecheck the workspace if the root tsconfig exists.
+# 2. Typecheck the workspace (packages) + each app that has its own tsconfig.
 if [ -f tsconfig.json ]; then
   bunx tsc --noEmit
 fi
+for app_tsconfig in apps/*/tsconfig.json; do
+  if [ -f "$app_tsconfig" ]; then
+    app_dir=$(dirname "$app_tsconfig")
+    (cd "$app_dir" && bunx tsc --noEmit)
+  fi
+done
 
 # 3. Format + lint staged files via lint-staged + Biome.
 bunx lint-staged
