@@ -37,3 +37,6 @@ bun-debug.log*
 
 # Playwright MCP snapshots
 .playwright-mcp/
+
+# vite-plugin-pwa dev SW output
+dev-dist/
