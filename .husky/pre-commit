@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+# 1. Regenerate the TanStack Router tree if the app is scaffolded.
+#    Gated on existence so this hook stays green during early scaffold commits
+#    before Task #4 wires up the router CLI.
+if [ -d apps/stokvel-app/src/routes ]; then
+  bunx tsr generate
+  git add apps/stokvel-app/src/routeTree.gen.ts 2>/dev/null || true
+fi
+
+# 2. Typecheck the workspace if any tsconfig project files exist.
+if find . -name "tsconfig.json" -not -path "*/node_modules/*" -not -path "*/dist/*" 2>/dev/null | grep -q .; then
+  bunx tsc --noEmit -b
+fi
+
+# 3. Format + lint staged files via lint-staged + Biome.
+bunx lint-staged

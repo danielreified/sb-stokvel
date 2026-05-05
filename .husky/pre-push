@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+# Run all tests across the workspace.
+bun run test
+
+# Run a full build to catch type errors and verify the bundle-size budget.
+bun run build

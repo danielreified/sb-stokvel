@@ -1,0 +1,6 @@
+# Bun configuration. Defaults are fine for this monorepo.
+# Workspace deps use the `workspace:*` protocol (declared per-package).
+
+[install]
+# Use semver ranges for external deps (default behaviour).
+exact = false
