@@ -3,4 +3,8 @@
  * Tier 2 per CLAUDE.md: balance, contribution history, amounts, statuses.
  * A key matches if the first element of the query key array is in this set.
  */
-export const SENSITIVE_QUERY_KEYS = new Set(['balance', 'contributions']);
+export const SENSITIVE_QUERY_KEYS = new Set([
+  'me', // belt-and-suspenders: primary exclusion is shouldDehydrateQuery in main.tsx
+  'balance',
+  'contributions',
+]);

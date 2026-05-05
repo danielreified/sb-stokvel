@@ -14,7 +14,14 @@ ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, buster: String(CACHE_SCHEMA_VERSION) }}
+      persistOptions={{
+        persister,
+        buster: String(CACHE_SCHEMA_VERSION),
+        // Tier-3 exclusion: 'me' contains the sessionKey — never write it to disk
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) => query.queryKey[0] !== 'me',
+        },
+      }}
     >
       <AppWithAuth />
     </PersistQueryClientProvider>
