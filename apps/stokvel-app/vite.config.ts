@@ -19,6 +19,10 @@ export default defineConfig((_env) => ({
       registerType: 'prompt',
       // skipWaiting + clientsClaim both false — banking context, no surprise reloads
       injectRegister: 'inline',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
       workbox: {
         // Precache the app shell only. JSON API responses are handled by React Query + IndexedDB.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
