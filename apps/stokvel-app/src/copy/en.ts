@@ -96,6 +96,7 @@ export const copy = {
     installPromptTitle: 'Add Seyva to your home screen',
     installPromptBody: 'Get quick access to your stokvel, even offline.',
     installButton: 'Add to home screen',
+    installButtonDesktop: 'Install app',
     installDismiss: 'Not now',
   },
 
