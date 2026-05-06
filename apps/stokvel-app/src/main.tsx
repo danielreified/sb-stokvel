@@ -5,6 +5,7 @@ import AppWithAuth from './App.js';
 import { CACHE_SCHEMA_VERSION } from './lib/persist/cache-schema.js';
 import { persister } from './lib/persist/persister.js';
 import { queryClient } from './lib/query-client.js';
+import '@seyva/ui/globals.css';
 import './styles.css';
 
 const root = document.getElementById('root');
