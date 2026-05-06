@@ -152,7 +152,9 @@ export function AppWindow({ member, children }: AppWindowProps) {
                 {copy.app.name}
               </span>
               <span className="text-sm text-muted-foreground">/</span>
-              <span className="text-sm font-semibold capitalize">{breadcrumbLabel}</span>
+              <span data-testid="breadcrumb-page" className="text-sm font-semibold capitalize">
+                {breadcrumbLabel}
+              </span>
               <div className="ml-auto flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-green-500" />

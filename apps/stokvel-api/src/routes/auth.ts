@@ -9,6 +9,15 @@ import type { Store } from '../store/types.js';
 
 const CONSTANT_RESPONSE_MS = 250;
 
+/**
+ * The Secure cookie flag is HTTPS-only — WebKit (Safari) refuses to store
+ * Secure cookies on http://localhost, breaking the dev/test flow. Emit
+ * `Secure` only when the request itself was HTTPS so prod still gets it.
+ */
+function secureFlag(url: string): string {
+  return new URL(url).protocol === 'https:' ? ' Secure;' : '';
+}
+
 /** Pad response time to ~250ms to prevent timing-based user enumeration. */
 async function constantTime<T>(fn: () => Promise<T>): Promise<T> {
   const [result] = await Promise.all([
@@ -77,7 +86,7 @@ export function createAuthRouter(
 
       c.header(
         'Set-Cookie',
-        `sid=${sessionId}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=43200`,
+        `sid=${sessionId}; HttpOnly;${secureFlag(c.req.url)} SameSite=Lax; Path=/; Max-Age=43200`,
       );
       // SECURITY: Cache-Control prevents proxies/bfcache caching the AES key
       c.header('Cache-Control', 'no-store, private');
@@ -97,7 +106,10 @@ export function createAuthRouter(
 
     if (sessionId) sessionRepo.delete(sessionId);
 
-    c.header('Set-Cookie', 'sid=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');
+    c.header(
+      'Set-Cookie',
+      `sid=; HttpOnly;${secureFlag(c.req.url)} SameSite=Lax; Path=/; Max-Age=0`,
+    );
     return c.body(null, 204);
   });
 

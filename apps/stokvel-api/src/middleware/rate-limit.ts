@@ -6,31 +6,42 @@ interface Bucket {
   windowStart: number;
 }
 
+const WINDOW_MS = 15 * 60 * 1000;
+
 function createBucket(windowMs: number, maxAttempts: number) {
   const buckets = new Map<string, Bucket>();
 
+  const tick = (key: string): Bucket => {
+    const now = Date.now();
+    let bucket = buckets.get(key);
+    if (!bucket || now - bucket.windowStart > windowMs) {
+      bucket = { count: 0, windowStart: now };
+      buckets.set(key, bucket);
+    }
+    return bucket;
+  };
+
   return {
-    isAllowed: (key: string): boolean => {
-      const now = Date.now();
-      let bucket = buckets.get(key);
-      if (!bucket || now - bucket.windowStart > windowMs) {
-        bucket = { count: 0, windowStart: now };
-        buckets.set(key, bucket);
-      }
-      bucket.count += 1;
-      return bucket.count <= maxAttempts;
+    /** True if the bucket has remaining capacity. Read-only — does NOT count this attempt. */
+    canAttempt: (key: string): boolean => {
+      const bucket = tick(key);
+      return bucket.count < maxAttempts;
+    },
+    /** Record a failed attempt. Only failures count toward the bucket. */
+    recordFailure: (key: string): void => {
+      tick(key).count += 1;
     },
     retryAfterSeconds: (key: string): number => {
       const bucket = buckets.get(key);
       if (!bucket) return 0;
-      return Math.ceil((bucket.windowStart + 15 * 60 * 1000 - Date.now()) / 1000);
+      return Math.ceil((bucket.windowStart + windowMs - Date.now()) / 1000);
     },
   };
 }
 
 /** Layered rate limiter for POST /api/auth/login. See CLAUDE.md for bucket rationale. */
-const perPhoneBucket = createBucket(15 * 60 * 1000, 5);
-const perIpBucket = createBucket(15 * 60 * 1000, 200);
+const perPhoneBucket = createBucket(WINDOW_MS, 5);
+const perIpBucket = createBucket(WINDOW_MS, 200);
 
 export const loginRateLimitMiddleware: MiddlewareHandler = async (c, next) => {
   const requestId = c.get('requestId');
@@ -46,7 +57,8 @@ export const loginRateLimitMiddleware: MiddlewareHandler = async (c, next) => {
 
   const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
 
-  if (!perPhoneBucket.isAllowed(phone)) {
+  // Pre-flight: refuse if either bucket is already saturated by past failures.
+  if (!perPhoneBucket.canAttempt(phone)) {
     const retryAfter = perPhoneBucket.retryAfterSeconds(phone);
     logger.warn('rate_limit_per_phone', { requestId, phone });
     c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
@@ -59,7 +71,7 @@ export const loginRateLimitMiddleware: MiddlewareHandler = async (c, next) => {
     return;
   }
 
-  if (!perIpBucket.isAllowed(clientIp)) {
+  if (!perIpBucket.canAttempt(clientIp)) {
     logger.warn('rate_limit_per_ip', { requestId });
     // SECURITY: constant-time, identical-shape — do not differentiate
     c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
@@ -70,4 +82,11 @@ export const loginRateLimitMiddleware: MiddlewareHandler = async (c, next) => {
   }
 
   await next();
+
+  // Post-flight: only failed logins (401 from the handler) count toward the
+  // buckets. Successful logins must not consume the user's failure budget.
+  if (c.res.status === 401) {
+    perPhoneBucket.recordFailure(phone);
+    perIpBucket.recordFailure(clientIp);
+  }
 };
