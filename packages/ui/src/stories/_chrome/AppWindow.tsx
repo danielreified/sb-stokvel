@@ -1,5 +1,5 @@
 import { Home, List, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Logo } from '../../components/logo.js';
 import { Separator } from '../../components/separator.js';
 import {
@@ -41,9 +41,13 @@ const NAV_ITEMS: { id: AppPage; label: string; icon: React.ReactNode }[] = [
 
 interface AppWindowProps {
   initialPage?: AppPage;
+  /** Overrides the default panel switching — render arbitrary content in the
+   * panel slot (e.g. a gate, lock screen, or error state). Sidebar +
+   * breadcrumb header still render around it. */
+  children?: ReactNode;
 }
 
-export function AppWindow({ initialPage = 'dashboard' }: AppWindowProps) {
+export function AppWindow({ initialPage = 'dashboard', children }: AppWindowProps) {
   const [active, setActive] = useState<AppPage>(initialPage);
   const isWide = useMediaQuery('(min-width: 1536px)');
   const [sidebarOpen, setSidebarOpen] = useState(isWide);
@@ -128,10 +132,14 @@ export function AppWindow({ initialPage = 'dashboard' }: AppWindowProps) {
           </header>
 
           <div className="flex-1 overflow-y-auto">
-            {active === 'dashboard' && <DashboardPanel />}
-            {active === 'members' && <MembersPanel />}
-            {active === 'contributions' && <ContributionsPanel />}
-            {active === 'profile' && <ProfilePanel />}
+            {children ?? (
+              <>
+                {active === 'dashboard' && <DashboardPanel />}
+                {active === 'members' && <MembersPanel />}
+                {active === 'contributions' && <ContributionsPanel />}
+                {active === 'profile' && <ProfilePanel />}
+              </>
+            )}
           </div>
         </div>
       </div>

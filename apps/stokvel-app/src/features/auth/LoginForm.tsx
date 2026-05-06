@@ -31,8 +31,8 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
         </p>
       )}
 
-      <div className="space-y-1">
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-200">
+      <div className="space-y-1.5">
+        <label htmlFor="phone" className="block text-sm font-medium">
           {copy.auth.phoneLabel}
         </label>
         <input
@@ -42,18 +42,18 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
           placeholder={copy.auth.phonePlaceholder}
           aria-invalid={!!errors.phone}
           aria-describedby={errors.phone ? 'phone-error' : undefined}
-          className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/40 focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="w-full rounded-xl border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
           {...register('phone')}
         />
         {errors.phone && (
-          <p id="phone-error" role="alert" className="text-xs text-red-300">
+          <p id="phone-error" role="alert" className="text-xs text-destructive">
             {errors.phone.message}
           </p>
         )}
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="pin" className="block text-sm font-medium text-gray-200">
+      <div className="space-y-1.5">
+        <label htmlFor="pin" className="block text-sm font-medium">
           {copy.auth.pinLabel}
         </label>
         <input
@@ -65,11 +65,11 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
           placeholder={copy.auth.pinPlaceholder}
           aria-invalid={!!errors.pin}
           aria-describedby={errors.pin ? 'pin-error' : undefined}
-          className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/40 focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="w-full rounded-xl border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
           {...register('pin')}
         />
         {errors.pin && (
-          <p id="pin-error" role="alert" className="text-xs text-red-300">
+          <p id="pin-error" role="alert" className="text-xs text-destructive">
             {errors.pin.message}
           </p>
         )}
@@ -78,7 +78,7 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-xl bg-white py-3 font-semibold text-brand disabled:opacity-60"
+        className="w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground disabled:opacity-60"
       >
         {isSubmitting ? copy.auth.loggingIn : copy.auth.loginButton}
       </button>

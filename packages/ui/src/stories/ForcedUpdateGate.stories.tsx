@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { AppWindow } from './_chrome/AppWindow.js';
 import { DemoShell } from './_chrome/DemoShell.js';
 import { ForcedUpdateGate } from './_chrome/ForcedUpdateGate.js';
 
@@ -9,9 +10,9 @@ const meta: Meta<typeof ForcedUpdateGate> = {
   decorators: [
     (Story) => (
       <DemoShell>
-        <div className="h-full w-full overflow-hidden bg-background lg:rounded-2xl lg:border lg:shadow-2xl">
+        <AppWindow>
           <Story />
-        </div>
+        </AppWindow>
       </DemoShell>
     ),
   ],

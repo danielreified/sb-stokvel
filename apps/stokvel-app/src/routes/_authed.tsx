@@ -1,9 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { BottomNav } from '../components/BottomNav.js';
 import { ForcedUpdateGate } from '../components/ForcedUpdateGate.js';
 import { OfflineBanner } from '../components/OfflineBanner.js';
 import { RecommendedUpdateBanner } from '../components/RecommendedUpdateBanner.js';
 import { meQueryOptions } from '../features/auth/queries.js';
+import { AppWindow } from '../layout/AppWindow.js';
+import { MarketingShell } from '../layout/MarketingShell.js';
 
 /**
  * Layout route wrapping all authenticated pages.
@@ -26,14 +28,21 @@ export const Route = createFileRoute('/_authed')({
 });
 
 function AuthedLayout() {
+  // beforeLoad has already gated this — me is guaranteed populated here.
+  // Read from the cache directly so we don't depend on RouterProvider's
+  // context prop having flushed the latest auth state.
+  const { data } = useQuery(meQueryOptions);
+  const member = data?.member ? { name: data.member.name, phone: data.member.phone } : null;
+
   return (
     <ForcedUpdateGate>
       <RecommendedUpdateBanner />
-      <OfflineBanner />
-      <div className="pb-16">
-        <Outlet />
-      </div>
-      <BottomNav />
+      <MarketingShell>
+        <AppWindow member={member}>
+          <OfflineBanner />
+          <Outlet />
+        </AppWindow>
+      </MarketingShell>
     </ForcedUpdateGate>
   );
 }
