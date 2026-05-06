@@ -2,6 +2,8 @@
 
 A Progressive Web App for managing stokvels (community savings groups), built as a Standard Bank South Africa demo. Designed for low-end Android devices on expensive mobile data.
 
+> **For the architectural why** behind every load-bearing decision in this codebase, start at [`docs/`](docs/README.md). The decisions log lists the choices and alternatives we considered; the architecture deep-dives cover persistence, security, testing, and i18n.
+
 ## Demo credentials
 
 | Field | Value |
