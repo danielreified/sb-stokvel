@@ -8,12 +8,21 @@ export function setLastRequestId(id: string): void {
   lastRequestId = id;
 }
 
+// In Vite builds the `__APP_VERSION__` identifier is substituted at build
+// time. In Bun tests there's no substitution; `typeof` is safe for undeclared
+// identifiers (doesn't throw), so we fall back to a globalThis lookup that
+// the test preload populates.
+const APP_VERSION =
+  typeof __APP_VERSION__ !== 'undefined'
+    ? __APP_VERSION__
+    : ((globalThis as { __APP_VERSION__?: string }).__APP_VERSION__ ?? 'unknown');
+
 function log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
   const entry = redact({
     time: new Date().toISOString(),
     level,
     message,
-    version: __APP_VERSION__,
+    version: APP_VERSION,
     ...(lastRequestId ? { requestId: lastRequestId } : {}),
     ...data,
   });

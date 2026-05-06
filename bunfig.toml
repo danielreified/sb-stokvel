@@ -4,3 +4,7 @@
 [install]
 # Use semver ranges for external deps (default behaviour).
 exact = false
+
+[test]
+# Define Vite-injected globals so app code under test doesn't blow up on them.
+preload = ["./tests/preload.ts"]

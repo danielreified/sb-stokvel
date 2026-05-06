@@ -18,5 +18,14 @@
     "../../packages/utils/src",
     "../../packages/api-client/src",
     "../../packages/ui/src"
+  ],
+  // Test files are validated by running them, not by tsc --noEmit. They
+  // import bun:test types we don't want polluting the production type-check
+  // (bun-types' global fetch typing clashes with the DOM lib).
+  "exclude": [
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "../../packages/**/__tests__/**",
+    "../../packages/**/*.test.ts"
   ]
 }

@@ -10,5 +10,6 @@
     },
     "noEmit": true
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"]
+  "include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"],
+  "exclude": ["packages/*/src/__tests__/**", "packages/*/src/**/*.test.ts"]
 }
