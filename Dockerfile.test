@@ -1,0 +1,26 @@
+# Playwright test runner with Bun + the matching browsers pre-installed.
+# Used both locally (cross-OS contributors) and in CI to guarantee identical
+# rendering — visual regression baselines are generated from this image.
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
+
+# Install bun (we use it as the runtime + script runner). The Playwright
+# image is jammy-based but lacks unzip which the Bun installer needs.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends unzip \
+  && rm -rf /var/lib/apt/lists/* \
+  && curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+WORKDIR /workspace
+
+# Copy lockfile + manifests first for layer caching. node_modules is .dockerignored.
+COPY package.json bun.lock bunfig.toml ./
+COPY apps apps
+COPY packages packages
+
+RUN bun install --frozen-lockfile
+
+# Copy the rest (test specs, configs, source)
+COPY . .
+
+CMD ["bun", "run", "test:e2e"]

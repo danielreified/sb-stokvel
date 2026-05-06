@@ -5,7 +5,18 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
-  expect: { timeout: 5_000 },
+  expect: {
+    timeout: 5_000,
+    // Visual regression: small threshold for antialiasing wobble. The
+    // `--update-snapshots` flag is the canonical way to refresh baselines
+    // (run `bun run test:e2e:update-snapshots` from inside the Docker image
+    // so all contributors compare against the same Linux reference).
+    toHaveScreenshot: {
+      maxDiffPixels: 200,
+      threshold: 0.2,
+      animations: 'disabled',
+    },
+  },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -17,6 +28,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    // Pin clock + locale + colorScheme so snapshots don't drift between
+    // a contributor's machine in 'August 2026' and another's in 'January 2027'.
+    timezoneId: 'Africa/Johannesburg',
+    locale: 'en-ZA',
+    colorScheme: 'light',
   },
 
   // 4-way matrix: Chrome + Safari × desktop + mobile. Each project has its
