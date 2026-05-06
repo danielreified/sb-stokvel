@@ -1,13 +1,10 @@
-import { toStokvelId } from '@seyva/types';
 import { createFileRoute, Outlet, useChildMatches } from '@tanstack/react-router';
-import { Suspense } from 'react';
 import { z } from 'zod';
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { ContributionsView } from '../../features/contributions/ContributionsView.js';
 import { DashboardSkeleton } from '../../features/dashboard/DashboardSkeleton.js';
 import { RouteErrorPanel } from '../../layout/RouteErrorPanel.js';
-
-const DEMO_STOKVEL_ID = toStokvelId('00000000-0000-0000-0000-000000000001');
+import { DEMO_STOKVEL_ID } from '../../lib/demo.js';
 
 const contributionsSearchSchema = z.object({
   month: z
@@ -32,14 +29,11 @@ function ContributionsPage() {
     return <Outlet />;
   }
 
-  return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <ContributionsView stokvelId={DEMO_STOKVEL_ID} filters={{ month, memberId }} />
-    </Suspense>
-  );
+  return <ContributionsView stokvelId={DEMO_STOKVEL_ID} filters={{ month, memberId }} />;
 }
 
 function ContributionsErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
+  const copy = useCopy();
   return (
     <RouteErrorPanel
       message={copy.errors.contributionsLoadFailed}

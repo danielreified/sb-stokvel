@@ -2,7 +2,7 @@ import { Button } from '@seyva/ui';
 import { AlertOctagon, ShieldOff } from 'lucide-react';
 import { useEffect, useSyncExternalStore } from 'react';
 import { MAX_STALENESS_MS } from '../config/version-guard.js';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 import { forceUpdate } from '../lib/sw-update/force-update.js';
 import { startVersionPolling, stopVersionPolling } from '../lib/version-guard/poll.js';
 import { versionGuardStore } from '../lib/version-guard/store.js';
@@ -40,6 +40,7 @@ function GateScreen({ icon: Icon, title, body, action, onAction }: GateScreenPro
  * 2. lastSuccessfulCheckAt within MAX_STALENESS_MS (the anti-network-block guardrail)
  */
 export function ForcedUpdateGate({ children }: ForcedUpdateGateProps) {
+  const copy = useCopy();
   const state = useSyncExternalStore(versionGuardStore.subscribe, versionGuardStore.getState);
 
   useEffect(() => {

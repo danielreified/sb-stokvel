@@ -1,7 +1,7 @@
 import { Button, InputOTP, InputOTPGroup, InputOTPSlot, Logo } from '@seyva/ui';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 
 interface PinLockScreenProps {
   /** Display name shown above the PIN input — usually the signed-in user. */
@@ -20,6 +20,7 @@ interface PinLockScreenProps {
  * is a soft re-auth checkpoint. Sign-out is the harder fallback.
  */
 export function PinLockScreen({ name, error, onVerify, onSignOut }: PinLockScreenProps) {
+  const copy = useCopy();
   const [pin, setPin] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | undefined>(error);

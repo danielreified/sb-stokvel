@@ -129,6 +129,15 @@ export const copy = {
     privacySecurity: 'Privacy & security',
     helpSupport: 'Help & support',
   },
+
+  language: {
+    pickerLabel: 'Language',
+  },
+
+  status: {
+    online: 'Online',
+    offline: 'Offline',
+  },
 } as const;
 
 export type Copy = typeof copy;

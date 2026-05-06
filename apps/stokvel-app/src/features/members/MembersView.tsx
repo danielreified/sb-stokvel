@@ -1,33 +1,24 @@
-import type { StokvelId } from '@seyva/types';
+import type { ContributionStatus, StokvelId } from '@seyva/types';
 import { Badge, ScrollArea, Separator } from '@seyva/ui';
 import { formatDate, formatMoney, formatPhone } from '@seyva/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { copy } from '../../copy/index.js';
-import { initialsOf } from '../../lib/initials.js';
+import { MemberAvatar } from '../../components/MemberAvatar.js';
+import { useCopy } from '../../copy/index.js';
+import { getCurrentMonth } from '../../lib/date.js';
 import { contributionsQueryOptions } from '../contributions/queries.js';
+import { getStatusLabel, STATUS_VARIANT } from '../contributions/status.js';
 import { balanceQueryOptions, membersQueryOptions } from '../dashboard/queries.js';
-
-const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive'> = {
-  confirmed: 'default',
-  pending: 'secondary',
-  missed: 'destructive',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: copy.contributions.statusConfirmed,
-  pending: copy.contributions.statusPending,
-  missed: copy.contributions.statusMissed,
-};
 
 interface MembersViewProps {
   stokvelId: StokvelId;
 }
 
 export function MembersView({ stokvelId }: MembersViewProps) {
+  const copy = useCopy();
   const { data: members } = useSuspenseQuery(membersQueryOptions(stokvelId));
   const { data: balance } = useSuspenseQuery(balanceQueryOptions(stokvelId));
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = getCurrentMonth();
   const { data: monthContributions } = useSuspenseQuery(
     contributionsQueryOptions(stokvelId, { month: currentMonth }),
   );
@@ -35,7 +26,7 @@ export function MembersView({ stokvelId }: MembersViewProps) {
   const [selectedId, setSelectedId] = useState<string>(members[0]?.id ?? '');
   const selected = members.find((m) => m.id === selectedId) ?? members[0];
 
-  const statusByMemberId = new Map<string, string>();
+  const statusByMemberId = new Map<string, ContributionStatus>();
   for (const c of monthContributions) statusByMemberId.set(c.memberId, c.status);
 
   if (!selected) return null;
@@ -62,13 +53,11 @@ export function MembersView({ stokvelId }: MembersViewProps) {
                   selected.id === m.id ? 'bg-muted' : ''
                 }`}
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {initialsOf(m.name)}
-                </div>
+                <MemberAvatar name={m.name} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{m.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {status ? STATUS_LABEL[status] : copy.members.statusNoContribution}
+                    {status ? getStatusLabel(copy, status) : copy.members.statusNoContribution}
                   </p>
                 </div>
               </button>
@@ -79,9 +68,7 @@ export function MembersView({ stokvelId }: MembersViewProps) {
 
       <div className="flex-1 space-y-5 overflow-y-auto p-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-            {initialsOf(selected.name)}
-          </div>
+          <MemberAvatar name={selected.name} size="md" tone="solid" />
           <div>
             <h2 className="text-xl font-semibold">{selected.name}</h2>
             <p className="text-sm text-muted-foreground">{formatPhone(selected.phone)}</p>
@@ -102,7 +89,7 @@ export function MembersView({ stokvelId }: MembersViewProps) {
             <p className="mt-1">
               {selectedStatus ? (
                 <Badge variant={STATUS_VARIANT[selectedStatus]}>
-                  {STATUS_LABEL[selectedStatus]}
+                  {getStatusLabel(copy, selectedStatus)}
                 </Badge>
               ) : (
                 <span className="text-sm text-muted-foreground">

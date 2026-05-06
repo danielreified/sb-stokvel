@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { useInstallPrompt } from './use-install-prompt.js';
 
 export function InstallPromptBanner() {
+  const copy = useCopy();
   const { canInstall, triggerInstall } = useInstallPrompt();
   const [dismissed, setDismissed] = useState(false);
 

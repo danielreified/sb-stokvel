@@ -1,9 +1,10 @@
 import { useState, useSyncExternalStore } from 'react';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 import { versionGuardStore } from '../lib/version-guard/store.js';
 
 /** Persistent dismissable banner shown when updateLevel === 'recommended'. */
 export function RecommendedUpdateBanner() {
+  const copy = useCopy();
   const [dismissed, setDismissed] = useState(false);
   const state = useSyncExternalStore(versionGuardStore.subscribe, versionGuardStore.getState);
 

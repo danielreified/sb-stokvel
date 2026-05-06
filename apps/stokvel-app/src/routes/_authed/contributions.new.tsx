@@ -1,15 +1,14 @@
-import { toStokvelId } from '@seyva/types';
 import { createFileRoute } from '@tanstack/react-router';
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { MakeContributionForm } from '../../features/contributions/MakeContributionForm.js';
-
-const DEMO_STOKVEL_ID = toStokvelId('00000000-0000-0000-0000-000000000001');
+import { DEMO_STOKVEL_ID } from '../../lib/demo.js';
 
 export const Route = createFileRoute('/_authed/contributions/new')({
   component: MakeContributionPage,
 });
 
 function MakeContributionPage() {
+  const copy = useCopy();
   const { auth } = Route.useRouteContext();
   const memberId = auth?.isAuthenticated ? auth.member.id : '';
 

@@ -1,6 +1,6 @@
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useEffect, useState } from 'react';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 
 const SW_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
@@ -9,6 +9,7 @@ const SW_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
  * Uses hourly polling instead of SW event-only to catch updates when the tab is dormant.
  */
 export function UpdatePrompt() {
+  const copy = useCopy();
   const [showPrompt, setShowPrompt] = useState(false);
 
   const { updateServiceWorker } = useRegisterSW({

@@ -3,37 +3,51 @@ import { formatPhone } from '@seyva/utils';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
-import { copy } from '../../copy/index.js';
+import { MemberAvatar } from '../../components/MemberAvatar.js';
+import { useCopy } from '../../copy/index.js';
 import { meQueryOptions } from '../../features/auth/queries.js';
 import { signOut } from '../../features/auth/sign-out.js';
+import { DashboardSkeleton } from '../../features/dashboard/DashboardSkeleton.js';
 import { InstallPromptBanner } from '../../features/pwa/InstallPromptBanner.js';
-import { initialsOf } from '../../lib/initials.js';
+import { RouteErrorPanel } from '../../layout/RouteErrorPanel.js';
 
 export const Route = createFileRoute('/_authed/profile')({
+  pendingComponent: DashboardSkeleton,
+  errorComponent: ProfileErrorComponent,
   component: ProfilePage,
 });
 
-const SETTINGS_ITEMS = [
-  copy.profile.accountSettings,
-  copy.profile.notifications,
-  copy.profile.privacySecurity,
-  copy.profile.helpSupport,
-] as const;
+function ProfileErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
+  const copy = useCopy();
+  return (
+    <RouteErrorPanel
+      message={copy.errors.unexpected}
+      detail={error instanceof Error ? error.message : undefined}
+      onRetry={reset}
+    />
+  );
+}
 
 function ProfilePage() {
+  const copy = useCopy();
   const { data } = useQuery(meQueryOptions);
   const member = data?.member ?? null;
 
   if (!member) return null;
+
+  const settingsItems = [
+    copy.profile.accountSettings,
+    copy.profile.notifications,
+    copy.profile.privacySecurity,
+    copy.profile.helpSupport,
+  ];
 
   return (
     <div className="space-y-5 p-6">
       <h2 className="text-xl font-semibold">{copy.profile.pageTitle}</h2>
 
       <div className="flex items-center gap-4 rounded-xl border bg-card p-6">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-          {initialsOf(member.name)}
-        </div>
+        <MemberAvatar name={member.name} size="md" tone="solid" />
         <div className="min-w-0">
           <p className="truncate text-lg font-semibold">{member.name}</p>
           <p className="text-sm text-muted-foreground">{formatPhone(member.phone)}</p>
@@ -41,7 +55,7 @@ function ProfilePage() {
       </div>
 
       <div className="divide-y rounded-lg border bg-card">
-        {SETTINGS_ITEMS.map((item) => (
+        {settingsItems.map((item) => (
           <button
             key={item}
             type="button"

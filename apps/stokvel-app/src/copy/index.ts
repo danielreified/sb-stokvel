@@ -1,5 +1,27 @@
-export type { Copy } from './en.js';
-export { copy } from './en.js';
+import { useSyncExternalStore } from 'react';
+import { localeStore } from './locale-store.js';
+import type { Copy } from './types.js';
+
+export { localeStore } from './locale-store.js';
+export type { Copy, Locale } from './types.js';
+export { LOCALES } from './types.js';
+
+/**
+ * Reactive accessor for the active locale's copy tree. Components calling
+ * this re-render when the user switches language.
+ */
+export function useCopy(): Copy {
+  return useSyncExternalStore(localeStore.subscribe, localeStore.getCopy, localeStore.getCopy);
+}
+
+/**
+ * Snapshot accessor for places that aren't React function components — event
+ * handlers, error formatters, hook logic outside the render path. Doesn't
+ * subscribe; reads the current locale at call time.
+ */
+export function getCopy(): Copy {
+  return localeStore.getCopy();
+}
 
 /**
  * Simple placeholder interpolation.

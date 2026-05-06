@@ -1,6 +1,6 @@
 import { WifiOff } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 
 function subscribe(cb: () => void) {
   window.addEventListener('online', cb);
@@ -20,6 +20,7 @@ function getServerSnapshot() {
 }
 
 export function OfflineBanner() {
+  const copy = useCopy();
   const isOnline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (isOnline) return null;

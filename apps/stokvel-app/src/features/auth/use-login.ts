@@ -4,7 +4,7 @@ import type { LoginInput } from '@seyva/validation';
 import { LoginSchema } from '@seyva/validation';
 import { useForm } from 'react-hook-form';
 import { router } from '../../App.js';
-import { copy } from '../../copy/index.js';
+import { getCopy } from '../../copy/index.js';
 import { api } from '../../lib/api.js';
 import { importSessionKey } from '../../lib/crypto/aes-gcm.js';
 import { keyStore } from '../../lib/crypto/key-store.js';
@@ -27,6 +27,7 @@ export function useLogin(redirectTo?: string) {
       queryClient.setQueryData(meQueryOptions.queryKey, data);
       await router.navigate({ to: redirectTo ?? '/dashboard', replace: true });
     } catch (err) {
+      const copy = getCopy();
       let message: string = copy.auth.unknownError;
       if (err instanceof ApiClientError) {
         if (err.status === 401) message = copy.auth.invalidCredentials;

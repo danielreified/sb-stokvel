@@ -2,32 +2,23 @@ import type { StokvelId } from '@seyva/types';
 import { Badge } from '@seyva/ui';
 import { formatMoney, formatRelativeTime } from '@seyva/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { copy, interpolate, plural } from '../../copy/index.js';
-import { initialsOf } from '../../lib/initials.js';
+import { MemberAvatar } from '../../components/MemberAvatar.js';
+import { interpolate, plural, useCopy } from '../../copy/index.js';
+import { getCurrentMonth } from '../../lib/date.js';
 import { contributionsQueryOptions } from '../contributions/queries.js';
+import { getStatusLabel, STATUS_VARIANT } from '../contributions/status.js';
 import { balanceQueryOptions, membersQueryOptions, stokvelQueryOptions } from './queries.js';
-
-const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive'> = {
-  confirmed: 'default',
-  pending: 'secondary',
-  missed: 'destructive',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: copy.contributions.statusConfirmed,
-  pending: copy.contributions.statusPending,
-  missed: copy.contributions.statusMissed,
-};
 
 interface DashboardViewProps {
   stokvelId: StokvelId;
 }
 
 export function DashboardView({ stokvelId }: DashboardViewProps) {
+  const copy = useCopy();
   const { data: stokvel } = useSuspenseQuery(stokvelQueryOptions(stokvelId));
   const { data: balance } = useSuspenseQuery(balanceQueryOptions(stokvelId));
   const { data: members } = useSuspenseQuery(membersQueryOptions(stokvelId));
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = getCurrentMonth();
   const { data: monthContributions } = useSuspenseQuery(
     contributionsQueryOptions(stokvelId, { month: currentMonth }),
   );
@@ -93,9 +84,13 @@ export function DashboardView({ stokvelId }: DashboardViewProps) {
                 className="flex items-center justify-between rounded-lg border bg-card px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {member ? initialsOf(member.name) : '—'}
-                  </div>
+                  {member ? (
+                    <MemberAvatar name={member.name} size="sm" />
+                  ) : (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+                      —
+                    </div>
+                  )}
                   <div>
                     <p className="text-sm font-medium">{member?.name ?? 'Unknown'}</p>
                     <p className="text-xs text-muted-foreground">
@@ -105,7 +100,7 @@ export function DashboardView({ stokvelId }: DashboardViewProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{formatMoney(c.amount)}</span>
-                  <Badge variant={STATUS_VARIANT[c.status]}>{STATUS_LABEL[c.status]}</Badge>
+                  <Badge variant={STATUS_VARIANT[c.status]}>{getStatusLabel(copy, c.status)}</Badge>
                 </div>
               </div>
             );

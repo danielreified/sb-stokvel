@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { UpdatePrompt } from '../components/UpdatePrompt.js';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 import type { AuthState } from '../features/auth/types.js';
 
 export interface RouterContext {
@@ -24,6 +24,7 @@ function RootComponent() {
 }
 
 function RootErrorComponent({ error }: { error: unknown }) {
+  const copy = useCopy();
   const message = error instanceof Error ? error.message : copy.errors.unexpected;
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">

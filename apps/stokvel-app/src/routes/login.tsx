@@ -2,7 +2,7 @@ import { Logo } from '@seyva/ui';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { Download } from 'lucide-react';
 import { z } from 'zod';
-import { copy } from '../copy/index.js';
+import { useCopy } from '../copy/index.js';
 import { LoginForm } from '../features/auth/LoginForm.js';
 import { useInstallPrompt } from '../features/pwa/use-install-prompt.js';
 import { AppWindow } from '../layout/AppWindow.js';
@@ -24,6 +24,7 @@ export const Route = createFileRoute('/login')({
 });
 
 function LoginPage() {
+  const copy = useCopy();
   const { redirect: redirectTo, reason } = Route.useSearch();
   const { canInstall, triggerInstall } = useInstallPrompt();
 

@@ -1,4 +1,4 @@
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { useLogin } from './use-login.js';
 
 interface LoginFormProps {
@@ -7,6 +7,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ redirectTo, reason }: LoginFormProps) {
+  const copy = useCopy();
   const { form, onSubmit } = useLogin(redirectTo);
   const {
     register,

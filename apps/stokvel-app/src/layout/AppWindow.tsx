@@ -17,9 +17,10 @@ import {
 import { Link, useMatchRoute, useRouterState } from '@tanstack/react-router';
 import { Home, List, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
-import { copy } from '../copy/index.js';
-import { initialsOf } from '../lib/initials.js';
+import { useEffect, useMemo, useState } from 'react';
+import { MemberAvatar } from '../components/MemberAvatar.js';
+import { useCopy } from '../copy/index.js';
+import { LanguageSwitcher } from './LanguageSwitcher.js';
 
 interface AppWindowProps {
   /**
@@ -32,17 +33,10 @@ interface AppWindowProps {
 }
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: copy.nav.dashboard, icon: Home },
-  { to: '/members', label: copy.nav.members, icon: Users },
-  { to: '/contributions', label: copy.nav.contributions, icon: List },
+  { to: '/dashboard', icon: Home, copyKey: 'dashboard' },
+  { to: '/members', icon: Users, copyKey: 'members' },
+  { to: '/contributions', icon: List, copyKey: 'contributions' },
 ] as const;
-
-const ACTIVE_BREADCRUMB: Record<string, string> = {
-  '/dashboard': copy.nav.dashboard,
-  '/members': copy.nav.members,
-  '/contributions': copy.nav.contributions,
-  '/profile': copy.nav.profile,
-};
 
 /**
  * Windowed app shell. Two variants:
@@ -56,6 +50,7 @@ const ACTIVE_BREADCRUMB: Record<string, string> = {
  *     consistent without exposing app surface to anonymous users.
  */
 export function AppWindow({ member, children }: AppWindowProps) {
+  const copy = useCopy();
   const isAuth = member !== null;
   const matchRoute = useMatchRoute();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -70,9 +65,16 @@ export function AppWindow({ member, children }: AppWindowProps) {
   const open = isAuth ? sidebarOpen : false;
   const onOpenChange = isAuth ? setSidebarOpen : () => {};
 
-  const activeKey = (Object.keys(ACTIVE_BREADCRUMB) as string[]).find((p) =>
-    pathname.startsWith(p),
-  );
+  const breadcrumbLabel = useMemo(() => {
+    const labels: Record<string, string> = {
+      '/dashboard': copy.nav.dashboard,
+      '/members': copy.nav.members,
+      '/contributions': copy.nav.contributions,
+      '/profile': copy.nav.profile,
+    };
+    const key = Object.keys(labels).find((p) => pathname.startsWith(p));
+    return key ? labels[key] : '';
+  }, [copy, pathname]);
 
   return (
     <SidebarProvider open={open} onOpenChange={onOpenChange} className="h-full">
@@ -95,12 +97,13 @@ export function AppWindow({ member, children }: AppWindowProps) {
                     {NAV_ITEMS.map((item) => {
                       const isActive = !!matchRoute({ to: item.to, fuzzy: true });
                       const Icon = item.icon;
+                      const label = copy.nav[item.copyKey];
                       return (
                         <SidebarMenuItem key={item.to}>
-                          <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                          <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                             <Link to={item.to}>
                               <Icon className="size-[18px]" aria-hidden="true" />
-                              <span>{item.label}</span>
+                              <span>{label}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -124,9 +127,7 @@ export function AppWindow({ member, children }: AppWindowProps) {
                     className="h-auto"
                   >
                     <Link to="/profile">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                        {initialsOf(member.name)}
-                      </div>
+                      <MemberAvatar name={member.name} size="xs" tone="solid" />
                       <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
                         <p className="truncate text-xs font-medium">{member.name}</p>
                         <p className="truncate text-[10px] text-muted-foreground">{member.phone}</p>
@@ -151,12 +152,13 @@ export function AppWindow({ member, children }: AppWindowProps) {
                 {copy.app.name}
               </span>
               <span className="text-sm text-muted-foreground">/</span>
-              <span className="text-sm font-semibold capitalize">
-                {activeKey ? ACTIVE_BREADCRUMB[activeKey] : ''}
-              </span>
-              <div className="ml-auto flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-xs text-muted-foreground">Online</span>
+              <span className="text-sm font-semibold capitalize">{breadcrumbLabel}</span>
+              <div className="ml-auto flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-green-500" />
+                  <span className="text-xs text-muted-foreground">{copy.status.online}</span>
+                </div>
+                <LanguageSwitcher />
               </div>
             </header>
           )}

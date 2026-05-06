@@ -1,12 +1,9 @@
-import { toStokvelId } from '@seyva/types';
 import { createFileRoute } from '@tanstack/react-router';
-import { Suspense } from 'react';
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { DashboardSkeleton } from '../../features/dashboard/DashboardSkeleton.js';
 import { MembersView } from '../../features/members/MembersView.js';
 import { RouteErrorPanel } from '../../layout/RouteErrorPanel.js';
-
-const DEMO_STOKVEL_ID = toStokvelId('00000000-0000-0000-0000-000000000001');
+import { DEMO_STOKVEL_ID } from '../../lib/demo.js';
 
 export const Route = createFileRoute('/_authed/members')({
   pendingComponent: DashboardSkeleton,
@@ -15,14 +12,11 @@ export const Route = createFileRoute('/_authed/members')({
 });
 
 function MembersPage() {
-  return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <MembersView stokvelId={DEMO_STOKVEL_ID} />
-    </Suspense>
-  );
+  return <MembersView stokvelId={DEMO_STOKVEL_ID} />;
 }
 
 function MembersErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
+  const copy = useCopy();
   return (
     <RouteErrorPanel
       message={copy.errors.membersLoadFailed}

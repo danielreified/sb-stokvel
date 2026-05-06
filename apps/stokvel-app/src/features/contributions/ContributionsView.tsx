@@ -3,23 +3,13 @@ import { Badge, Button } from '@seyva/ui';
 import { formatMoney, formatMonth } from '@seyva/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { copy, interpolate } from '../../copy/index.js';
-import { initialsOf } from '../../lib/initials.js';
+import { MemberAvatar } from '../../components/MemberAvatar.js';
+import { interpolate, useCopy } from '../../copy/index.js';
+import { getCurrentMonth } from '../../lib/date.js';
 import { membersQueryOptions } from '../dashboard/queries.js';
 import type { ContributionFilters } from './queries.js';
 import { contributionsQueryOptions } from './queries.js';
-
-const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive'> = {
-  confirmed: 'default',
-  pending: 'secondary',
-  missed: 'destructive',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: copy.contributions.statusConfirmed,
-  pending: copy.contributions.statusPending,
-  missed: copy.contributions.statusMissed,
-};
+import { getStatusLabel, STATUS_VARIANT } from './status.js';
 
 interface ContributionsViewProps {
   stokvelId: StokvelId;
@@ -27,11 +17,12 @@ interface ContributionsViewProps {
 }
 
 export function ContributionsView({ stokvelId, filters }: ContributionsViewProps) {
+  const copy = useCopy();
   const { data: contributions } = useSuspenseQuery(contributionsQueryOptions(stokvelId, filters));
   const { data: members } = useSuspenseQuery(membersQueryOptions(stokvelId));
   const memberById = new Map(members.map((m) => [m.id, m]));
 
-  const summaryMonth = filters.month ?? new Date().toISOString().slice(0, 7);
+  const summaryMonth = filters.month ?? getCurrentMonth();
   const paidCount = contributions.filter((c) => c.status === 'confirmed').length;
 
   return (
@@ -74,15 +65,19 @@ export function ContributionsView({ stokvelId, filters }: ContributionsViewProps
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-                    {member ? initialsOf(member.name) : '—'}
-                  </div>
+                  {member ? (
+                    <MemberAvatar name={member.name} size="xs" />
+                  ) : (
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
+                      —
+                    </div>
+                  )}
                   <span className="truncate text-sm font-medium">{member?.name ?? 'Unknown'}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">{formatMonth(c.month)}</span>
                 <span className="text-sm font-semibold">{formatMoney(c.amount)}</span>
                 <div className="flex justify-end">
-                  <Badge variant={STATUS_VARIANT[c.status]}>{STATUS_LABEL[c.status]}</Badge>
+                  <Badge variant={STATUS_VARIANT[c.status]}>{getStatusLabel(copy, c.status)}</Badge>
                 </div>
               </div>
             );

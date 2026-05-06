@@ -4,8 +4,9 @@ import type { ContributionCreateInput } from '@seyva/validation';
 import { ContributionCreateSchema } from '@seyva/validation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { copy } from '../../copy/index.js';
+import { useCopy } from '../../copy/index.js';
 import { api } from '../../lib/api.js';
+import { getCurrentMonth } from '../../lib/date.js';
 
 interface MakeContributionFormProps {
   stokvelId: StokvelId;
@@ -18,6 +19,7 @@ export function MakeContributionForm({
   memberId,
   onSuccess,
 }: MakeContributionFormProps) {
+  const copy = useCopy();
   const queryClient = useQueryClient();
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
@@ -26,7 +28,7 @@ export function MakeContributionForm({
     defaultValues: {
       memberId,
       amount: 50000,
-      month: new Date().toISOString().slice(0, 7),
+      month: getCurrentMonth(),
     },
   });
 
