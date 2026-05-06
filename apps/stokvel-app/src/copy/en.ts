@@ -50,11 +50,21 @@ export const copy = {
     pageTitle: 'Members',
     joinedLabel: 'Joined {date}',
     loadFailed: 'Could not load members. Tap to retry.',
+    contributionLabel: 'Contribution',
+    statusLabel: 'Status',
+    memberSinceLabel: 'Member since',
+    statusNoContribution: 'No contribution yet',
   },
 
   contributions: {
     pageTitle: 'Contributions',
     monthLabel: '{month}',
+    summaryLabel: '{month} · {paid} of {total} paid',
+    emptyMessage: 'No contributions found for the selected filters.',
+    columnMember: 'Member',
+    columnMonth: 'Month',
+    columnAmount: 'Amount',
+    columnStatus: 'Status',
     statusConfirmed: 'Confirmed',
     statusPending: 'Pending',
     statusMissed: 'Missed',
@@ -103,10 +113,21 @@ export const copy = {
     installDismiss: 'Not now',
   },
 
+  pinLock: {
+    statusLabel: 'App locked',
+    welcome: 'Welcome back, {name}',
+    prompt: 'Enter your PIN to continue',
+    signOutInstead: 'Sign out instead',
+  },
+
   profile: {
     pageTitle: 'Profile',
     memberSince: 'Member since {date}',
     phoneLabel: 'Mobile number',
+    accountSettings: 'Account settings',
+    notifications: 'Notifications',
+    privacySecurity: 'Privacy & security',
+    helpSupport: 'Help & support',
   },
 } as const;
 

@@ -1,3 +1,5 @@
+import { Button } from '@seyva/ui';
+import { AlertOctagon, ShieldOff } from 'lucide-react';
 import { useEffect, useSyncExternalStore } from 'react';
 import { MAX_STALENESS_MS } from '../config/version-guard.js';
 import { copy } from '../copy/index.js';
@@ -7,6 +9,29 @@ import { versionGuardStore } from '../lib/version-guard/store.js';
 
 interface ForcedUpdateGateProps {
   children: React.ReactNode;
+}
+
+interface GateScreenProps {
+  icon: typeof AlertOctagon;
+  title: string;
+  body: string;
+  action: string;
+  onAction: () => void;
+}
+
+function GateScreen({ icon: Icon, title, body, action, onAction }: GateScreenProps) {
+  return (
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4 bg-background p-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+        <Icon className="size-7" aria-hidden="true" />
+      </div>
+      <div className="max-w-sm space-y-1.5">
+        <h1 className="text-xl font-semibold">{title}</h1>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </div>
+      <Button onClick={onAction}>{action}</Button>
+    </div>
+  );
 }
 
 /**
@@ -28,33 +53,25 @@ export function ForcedUpdateGate({ children }: ForcedUpdateGateProps) {
 
   if (isStale) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-xl font-semibold text-gray-900">{copy.pwa.staleVersionTitle}</p>
-        <p className="text-gray-500">{copy.pwa.staleVersionBody}</p>
-        <button
-          type="button"
-          className="rounded-xl bg-brand px-8 py-3 font-medium text-white"
-          onClick={() => startVersionPolling()}
-        >
-          {copy.pwa.retryButton}
-        </button>
-      </div>
+      <GateScreen
+        icon={ShieldOff}
+        title={copy.pwa.staleVersionTitle}
+        body={copy.pwa.staleVersionBody}
+        action={copy.pwa.retryButton}
+        onAction={() => startVersionPolling()}
+      />
     );
   }
 
   if (state.updateLevel === 'forced') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-xl font-semibold text-gray-900">{copy.pwa.forcedUpdateTitle}</p>
-        <p className="text-gray-500">{copy.pwa.forcedUpdateBody}</p>
-        <button
-          type="button"
-          className="rounded-xl bg-brand px-8 py-3 font-medium text-white"
-          onClick={() => void forceUpdate()}
-        >
-          {copy.pwa.forcedUpdateButton}
-        </button>
-      </div>
+      <GateScreen
+        icon={AlertOctagon}
+        title={copy.pwa.forcedUpdateTitle}
+        body={copy.pwa.forcedUpdateBody}
+        action={copy.pwa.forcedUpdateButton}
+        onAction={() => void forceUpdate()}
+      />
     );
   }
 

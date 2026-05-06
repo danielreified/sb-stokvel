@@ -1,3 +1,4 @@
+import { WifiOff } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 import { copy } from '../copy/index.js';
 
@@ -24,7 +25,12 @@ export function OfflineBanner() {
   if (isOnline) return null;
 
   return (
-    <div role="status" aria-live="polite" className="bg-amber-50 px-4 py-2 text-center">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2"
+    >
+      <WifiOff className="size-4 shrink-0 text-amber-700" aria-hidden="true" />
       <p className="text-xs font-medium text-amber-800">{copy.offline.banner}</p>
     </div>
   );

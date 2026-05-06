@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { copy } from '../../copy/index.js';
 import { DashboardSkeleton } from '../../features/dashboard/DashboardSkeleton.js';
 import { DashboardView } from '../../features/dashboard/DashboardView.js';
+import { RouteErrorPanel } from '../../layout/RouteErrorPanel.js';
 
 // Fixed UUID from the seed — matches apps/stokvel-api/src/store/seed.ts
 const DEMO_STOKVEL_ID = toStokvelId('00000000-0000-0000-0000-000000000001');
@@ -22,11 +23,12 @@ function DashboardPage() {
   );
 }
 
-function DashboardErrorComponent({ error }: { error: unknown }) {
+function DashboardErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   return (
-    <div className="p-4 text-center">
-      <p className="text-gray-500">{copy.errors.dashboardLoadFailed}</p>
-      {error instanceof Error && <p className="mt-1 text-xs text-gray-400">{error.message}</p>}
-    </div>
+    <RouteErrorPanel
+      message={copy.errors.dashboardLoadFailed}
+      detail={error instanceof Error ? error.message : undefined}
+      onRetry={reset}
+    />
   );
 }

@@ -4,8 +4,14 @@ import { ForcedUpdateGate } from '../components/ForcedUpdateGate.js';
 import { OfflineBanner } from '../components/OfflineBanner.js';
 import { RecommendedUpdateBanner } from '../components/RecommendedUpdateBanner.js';
 import { meQueryOptions } from '../features/auth/queries.js';
+import { signOut } from '../features/auth/sign-out.js';
 import { AppWindow } from '../layout/AppWindow.js';
 import { MarketingShell } from '../layout/MarketingShell.js';
+import { PinLockScreen } from '../layout/PinLockScreen.js';
+import { api } from '../lib/api.js';
+import { useIdleLock } from '../lib/use-idle-lock.js';
+
+const IDLE_LOCK_MS = 60_000;
 
 /**
  * Layout route wrapping all authenticated pages.
@@ -14,8 +20,6 @@ import { MarketingShell } from '../layout/MarketingShell.js';
  */
 export const Route = createFileRoute('/_authed')({
   beforeLoad: async ({ context, location }) => {
-    // On hard navigation the me query hasn't resolved yet; ensureQueryData waits for it.
-    // On soft navigation the cache is already populated — returns immediately.
     const me = await context.queryClient.ensureQueryData(meQueryOptions).catch(() => null);
     if (!me?.member) {
       throw redirect({
@@ -29,10 +33,24 @@ export const Route = createFileRoute('/_authed')({
 
 function AuthedLayout() {
   // beforeLoad has already gated this — me is guaranteed populated here.
-  // Read from the cache directly so we don't depend on RouterProvider's
-  // context prop having flushed the latest auth state.
   const { data } = useQuery(meQueryOptions);
   const member = data?.member ? { name: data.member.name, phone: data.member.phone } : null;
+
+  const { isLocked, unlock } = useIdleLock({
+    thresholdMs: IDLE_LOCK_MS,
+    enabled: member !== null,
+  });
+
+  const handleVerify = async (pin: string) => {
+    if (!data?.member) return false;
+    try {
+      await api.auth.login({ phone: data.member.phone, pin });
+      unlock();
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <ForcedUpdateGate>
@@ -40,7 +58,15 @@ function AuthedLayout() {
       <MarketingShell>
         <AppWindow member={member}>
           <OfflineBanner />
-          <Outlet />
+          {isLocked && member ? (
+            <PinLockScreen
+              name={member.name.split(' ')[0] ?? member.name}
+              onVerify={handleVerify}
+              onSignOut={() => void signOut()}
+            />
+          ) : (
+            <Outlet />
+          )}
         </AppWindow>
       </MarketingShell>
     </ForcedUpdateGate>

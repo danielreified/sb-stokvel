@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { copy } from '../../copy/index.js';
 import { DashboardSkeleton } from '../../features/dashboard/DashboardSkeleton.js';
 import { MembersView } from '../../features/members/MembersView.js';
+import { RouteErrorPanel } from '../../layout/RouteErrorPanel.js';
 
 const DEMO_STOKVEL_ID = toStokvelId('00000000-0000-0000-0000-000000000001');
 
@@ -21,6 +22,12 @@ function MembersPage() {
   );
 }
 
-function MembersErrorComponent() {
-  return <p className="p-4 text-center text-gray-500">{copy.members.loadFailed}</p>;
+function MembersErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
+  return (
+    <RouteErrorPanel
+      message={copy.errors.membersLoadFailed}
+      detail={error instanceof Error ? error.message : undefined}
+      onRetry={reset}
+    />
+  );
 }
