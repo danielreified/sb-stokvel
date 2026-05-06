@@ -12,6 +12,11 @@
  * iterations slows offline brute-force but doesn't defeat dedicated
  * attackers if the encrypted blob leaks. Production hardening would bind
  * the wrapping key to a device-secure-enclave secret (WebAuthn / passkey).
+ *
+ * reason: the `as BufferSource` casts below are required because Web Crypto's
+ * lib.dom.d.ts typings don't narrowly accept `Uint8Array<ArrayBufferLike>`
+ * (the new generic form) in BufferSource positions, even though it's
+ * compatible at runtime. Bandaid until TS lib catches up.
  */
 
 const PBKDF2_ITERATIONS = 600_000;

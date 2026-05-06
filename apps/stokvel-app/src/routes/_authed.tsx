@@ -59,6 +59,8 @@ function AuthedLayout() {
     if (!sessionKeyBytes) return false;
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
+      // reason: Uint8Array<ArrayBufferLike> isn't narrowed to BufferSource by
+      // current TS lib.dom; runtime-compatible. Same workaround as in pin-wrap.ts.
       sessionKeyBytes as BufferSource,
       { name: 'AES-GCM', length: 256 },
       false,

@@ -65,6 +65,7 @@ export function PinLockScreen({ name, error, onVerify, onSignOut }: PinLockScree
         </div>
 
         <InputOTP
+          autoFocus
           maxLength={4}
           value={pin}
           onChange={handleChange}
