@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { ForcedUpdateGate } from '../components/ForcedUpdateGate.js';
 import { OfflineBanner } from '../components/OfflineBanner.js';
 import { RecommendedUpdateBanner } from '../components/RecommendedUpdateBanner.js';
@@ -8,7 +9,9 @@ import { signOut } from '../features/auth/sign-out.js';
 import { AppWindow } from '../layout/AppWindow.js';
 import { MarketingShell } from '../layout/MarketingShell.js';
 import { PinLockScreen } from '../layout/PinLockScreen.js';
-import { api } from '../lib/api.js';
+import { keyStore } from '../lib/crypto/key-store.js';
+import { unwrapSessionKey } from '../lib/crypto/pin-wrap.js';
+import { wrappedKeyStore } from '../lib/crypto/wrapped-key-store.js';
 import { useIdleLock } from '../lib/use-idle-lock.js';
 
 const IDLE_LOCK_MS = 60_000;
@@ -41,15 +44,29 @@ function AuthedLayout() {
     enabled: member !== null,
   });
 
+  // When the lock engages, zero out the in-memory AES key. The wrapped blob
+  // stays in IDB; PIN unwraps it on unlock.
+  useEffect(() => {
+    if (isLocked) keyStore.clearKey();
+  }, [isLocked]);
+
+  // Verify offline by unwrapping the IDB-stored blob with the entered PIN.
+  // No BFF call required — works without a network.
   const handleVerify = async (pin: string) => {
-    if (!data?.member) return false;
-    try {
-      await api.auth.login({ phone: data.member.phone, pin });
-      unlock();
-      return true;
-    } catch {
-      return false;
-    }
+    const blob = await wrappedKeyStore.load();
+    if (!blob) return false;
+    const sessionKeyBytes = await unwrapSessionKey(pin, blob);
+    if (!sessionKeyBytes) return false;
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      sessionKeyBytes as BufferSource,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt'],
+    );
+    keyStore.setKey(cryptoKey);
+    unlock();
+    return true;
   };
 
   return (
@@ -58,14 +75,13 @@ function AuthedLayout() {
       <MarketingShell>
         <AppWindow member={member}>
           <OfflineBanner />
-          {isLocked && member ? (
+          <Outlet />
+          {isLocked && member && (
             <PinLockScreen
               name={member.name.split(' ')[0] ?? member.name}
               onVerify={handleVerify}
               onSignOut={() => void signOut()}
             />
-          ) : (
-            <Outlet />
           )}
         </AppWindow>
       </MarketingShell>
