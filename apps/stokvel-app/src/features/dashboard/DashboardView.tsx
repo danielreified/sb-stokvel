@@ -5,6 +5,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { MemberAvatar } from '../../components/MemberAvatar.js';
 import { interpolate, plural, useCopy } from '../../copy/index.js';
 import { getCurrentMonth } from '../../lib/date.js';
+import { useCachedAt } from '../../lib/persist/use-cached-at.js';
 import { contributionsQueryOptions } from '../contributions/queries.js';
 import { getStatusLabel, STATUS_VARIANT } from '../contributions/status.js';
 import { balanceQueryOptions, membersQueryOptions, stokvelQueryOptions } from './queries.js';
@@ -23,6 +24,11 @@ export function DashboardView({ stokvelId }: DashboardViewProps) {
     contributionsQueryOptions(stokvelId, { month: currentMonth }),
   );
   const { data: recent } = useSuspenseQuery(contributionsQueryOptions(stokvelId, {}));
+
+  // "Last synced X ago" indicator — read from idbCache so it reflects the
+  // actual disk-fetch timestamp (which differs from server reconciledAt
+  // when we're showing stale offline data).
+  const balanceCachedAt = useCachedAt(`balance:${stokvelId}`, balance);
 
   const memberById = new Map(members.map((m) => [m.id, m]));
   const paidThisMonth = monthContributions.filter((c) => c.status === 'confirmed').length;
@@ -50,6 +56,14 @@ export function DashboardView({ stokvelId }: DashboardViewProps) {
           {interpolate(copy.dashboard.reconciledAtLabel, {
             date: formatRelativeTime(balance.reconciledAt),
           })}
+          {balanceCachedAt && (
+            <>
+              {' · '}
+              {interpolate(copy.dashboard.lastSyncedLabel, {
+                date: formatRelativeTime(balanceCachedAt),
+              })}
+            </>
+          )}
         </p>
       </div>
 

@@ -43,6 +43,12 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+# Visual regression baselines: only Linux PNGs are canonical (generated from
+# the Docker rig). Native runs on Mac/Windows produce host-suffixed PNGs we
+# don't want in git.
+tests/e2e/**/*-darwin.png
+tests/e2e/**/*-win32.png
+
 # vite-plugin-pwa dev SW output
 dev-dist/
 playwright/.auth/
