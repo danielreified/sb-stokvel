@@ -41,6 +41,9 @@ export const copy = {
     memberCountLabel: { one: '{count} member', other: '{count} members' },
     reconciledAtLabel: 'Reconciled {date}',
     nextPayoutLabel: 'Next payout',
+    paidThisMonthLabel: 'Paid this month',
+    paidThisMonthValue: '{paid} / {total}',
+    recentActivityLabel: 'Recent activity',
   },
 
   members: {
