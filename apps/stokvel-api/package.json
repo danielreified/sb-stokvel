@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev": "bun --env-file=.env --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun dist/index.js",
     "typecheck": "tsc --noEmit",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "@seyva/db": "workspace:*",
     "@seyva/types": "workspace:*",
     "@seyva/utils": "workspace:*",
     "@seyva/validation": "workspace:*",

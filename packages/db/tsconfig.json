@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun-types"],
+    "paths": {
+      "@seyva/types": ["../../packages/types/src/index.ts"]
+    }
+  },
+  "include": ["src", "drizzle.config.ts", "../../packages/types/src"]
+}

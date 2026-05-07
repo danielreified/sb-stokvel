@@ -1,49 +1,48 @@
-import { beforeEach, describe, expect, it } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it } from 'bun:test';
+import { eq, schema } from '@seyva/db';
 import { Hono } from 'hono';
 import { computeUaFingerprint, createAuthMiddleware } from '../middleware/auth.js';
 import { requestIdMiddleware } from '../middleware/request-id.js';
 import { createSessionRepository } from '../repository/session.js';
 import { createStokvelRepository } from '../repository/stokvel.js';
 import { createStokvelRouter } from '../routes/stokvel.js';
-import { createStore } from '../store/seed.js';
-import type { Store } from '../store/types.js';
+import { getTestDb, resetAndSeed } from './_db.js';
 
 const TEST_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 const STOKVEL_ID = '00000000-0000-0000-0000-000000000001';
 const MEMBER_ID = '10000000-0000-0000-0000-000000000001';
-const SESSION_ID = 'test-session-id';
-
-async function buildApp(store: Store) {
-  const sessionRepo = createSessionRepository(store);
-  const stokvelRepo = createStokvelRepository(store);
-  const authMiddleware = createAuthMiddleware(sessionRepo);
-
-  const fingerprint = await computeUaFingerprint(TEST_UA);
-
-  sessionRepo.create(SESSION_ID, {
-    userId: MEMBER_ID,
-    createdAt: Date.now(),
-    lastSeenAt: Date.now(),
-    uaFingerprint: fingerprint,
-    sessionKey: 'test-session-key',
-  });
-
-  const app = new Hono();
-  app.use('*', requestIdMiddleware);
-  app.route('/api/stokvel', createStokvelRouter(stokvelRepo, authMiddleware));
-
-  return app;
-}
+const SESSION_ID = 'test-session-id-contributions';
 
 describe('POST /api/stokvel/:stokvelId/contributions', () => {
-  let store: Store;
   let app: Hono;
+  let db: Awaited<ReturnType<typeof getTestDb>>;
 
   beforeEach(async () => {
-    store = createStore();
-    app = await buildApp(store);
+    db = await getTestDb();
+    await resetAndSeed(db);
+
+    const sessionRepo = createSessionRepository(db.db);
+    const stokvelRepo = createStokvelRepository(db.db);
+    const authMiddleware = createAuthMiddleware(sessionRepo);
+
+    const fingerprint = await computeUaFingerprint(TEST_UA);
+    await sessionRepo.create(SESSION_ID, {
+      userId: MEMBER_ID,
+      createdAt: Date.now(),
+      lastSeenAt: Date.now(),
+      uaFingerprint: fingerprint,
+      sessionKey: 'test-session-key',
+    });
+
+    app = new Hono();
+    app.use('*', requestIdMiddleware);
+    app.route('/api/stokvel', createStokvelRouter(stokvelRepo, authMiddleware));
+  });
+
+  afterAll(async () => {
+    await db.close();
   });
 
   it('creates a contribution and returns 201', async () => {
@@ -118,8 +117,11 @@ describe('POST /api/stokvel/:stokvelId/contributions', () => {
     expect(res.status).toBe(401);
   });
 
-  it('persists the new contribution in the store', async () => {
-    const before = store.contributions.size;
+  it('persists the new contribution in the database', async () => {
+    const before = await db.db
+      .select()
+      .from(schema.contributions)
+      .where(eq(schema.contributions.stokvelId, STOKVEL_ID));
 
     await app.request(`/api/stokvel/${STOKVEL_ID}/contributions`, {
       method: 'POST',
@@ -131,6 +133,10 @@ describe('POST /api/stokvel/:stokvelId/contributions', () => {
       body: JSON.stringify({ memberId: MEMBER_ID, amount: 75000, month: '2025-06' }),
     });
 
-    expect(store.contributions.size).toBe(before + 1);
+    const after = await db.db
+      .select()
+      .from(schema.contributions)
+      .where(eq(schema.contributions.stokvelId, STOKVEL_ID));
+    expect(after.length).toBe(before.length + 1);
   });
 });

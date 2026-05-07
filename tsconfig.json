@@ -2,6 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@seyva/db": ["./packages/db/src/index.ts"],
       "@seyva/types": ["./packages/types/src/index.ts"],
       "@seyva/validation": ["./packages/validation/src/index.ts"],
       "@seyva/utils": ["./packages/utils/src/index.ts"],

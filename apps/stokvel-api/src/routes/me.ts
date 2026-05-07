@@ -1,18 +1,18 @@
 import { Hono } from 'hono';
 import type { createAuthMiddleware } from '../middleware/auth.js';
-import type { Store } from '../store/types.js';
+import type { createStokvelRepository } from '../repository/stokvel.js';
 
 export function createMeRouter(
-  store: Store,
+  stokvelRepo: ReturnType<typeof createStokvelRepository>,
   authMiddleware: ReturnType<typeof createAuthMiddleware>,
 ) {
   const router = new Hono();
 
-  router.get('/me', authMiddleware, (c) => {
+  router.get('/me', authMiddleware, async (c) => {
     const userId = c.get('userId');
     const sessionKey = c.get('sessionKey');
 
-    const member = store.members.get(userId as `${string}`);
+    const member = await stokvelRepo.findMemberById(userId);
     if (!member) return c.json({ error: 'not_found' }, 404);
 
     // SECURITY: Cache-Control prevents proxies/bfcache caching the AES key

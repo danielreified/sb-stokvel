@@ -1,3 +1,4 @@
+import { createDb } from '@seyva/db';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { VERSION_CONFIG } from './config/versions.js';
@@ -13,11 +14,16 @@ import { healthRouter } from './routes/health.js';
 import { createMeRouter } from './routes/me.js';
 import { createStokvelRouter } from './routes/stokvel.js';
 import { versionRouter } from './routes/version.js';
-import { createStore } from './store/seed.js';
 
-const store = createStore();
-const sessionRepo = createSessionRepository(store);
-const stokvelRepo = createStokvelRepository(store);
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  console.error('DATABASE_URL is required');
+  process.exit(1);
+}
+
+const { db } = createDb(databaseUrl);
+const sessionRepo = createSessionRepository(db);
+const stokvelRepo = createStokvelRepository(db);
 const authMiddleware = createAuthMiddleware(sessionRepo);
 
 const app = new Hono();
@@ -49,8 +55,8 @@ if (process.env.NODE_ENV !== 'production') {
 // Routes
 app.route('/api', healthRouter);
 app.route('/api', cspReportRouter);
-app.route('/api/auth', createAuthRouter(store, sessionRepo));
-app.route('/api', createMeRouter(store, authMiddleware));
+app.route('/api/auth', createAuthRouter(stokvelRepo, sessionRepo));
+app.route('/api', createMeRouter(stokvelRepo, authMiddleware));
 app.route('/api/stokvel', createStokvelRouter(stokvelRepo, authMiddleware));
 app.route('/api', versionRouter);
 

@@ -37,7 +37,7 @@ export function createAuthMiddleware(sessionRepo: ReturnType<typeof createSessio
       return c.json({ error: 'unauthorized' }, 401);
     }
 
-    const session = sessionRepo.find(sessionId);
+    const session = await sessionRepo.find(sessionId);
     if (!session) {
       return c.json({ error: 'unauthorized' }, 401);
     }
@@ -45,12 +45,12 @@ export function createAuthMiddleware(sessionRepo: ReturnType<typeof createSessio
     const incomingFingerprint = await computeUaFingerprint(c.req.header('user-agent') ?? '');
     const check = sessionRepo.isValid(session, incomingFingerprint);
     if (!check.valid) {
-      sessionRepo.delete(sessionId);
+      await sessionRepo.delete(sessionId);
       logger.info('session_invalidated', { requestId: c.get('requestId'), reason: check.reason });
       return c.json({ error: 'unauthorized' }, 401);
     }
 
-    sessionRepo.touch(sessionId);
+    await sessionRepo.touch(sessionId);
     c.set('sessionId', sessionId);
     c.set('userId', session.userId);
     c.set('sessionKey', session.sessionKey);

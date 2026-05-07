@@ -4,8 +4,11 @@ import { logger } from '../lib/logger.js';
 import { computeUaFingerprint } from '../middleware/auth.js';
 import { loginRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { createSessionRepository } from '../repository/session.js';
-import { DEMO_PHONE, DEMO_PIN } from '../store/seed.js';
-import type { Store } from '../store/types.js';
+import type { createStokvelRepository } from '../repository/stokvel.js';
+
+/** DEMO: hardcoded credentials. Replace with real auth in production. */
+export const DEMO_PHONE = '+27821000001';
+export const DEMO_PIN = '1234';
 
 const CONSTANT_RESPONSE_MS = 250;
 
@@ -33,7 +36,7 @@ function generateSessionKey(): string {
 }
 
 export function createAuthRouter(
-  store: Store,
+  stokvelRepo: ReturnType<typeof createStokvelRepository>,
   sessionRepo: ReturnType<typeof createSessionRepository>,
 ) {
   const router = new Hono();
@@ -65,7 +68,7 @@ export function createAuthRouter(
         return c.json({ error: 'invalid_credentials' }, 401);
       }
 
-      const member = [...store.members.values()].find((m) => m.phone === phone);
+      const member = await stokvelRepo.findMemberByPhone(phone);
       if (!member) {
         return c.json({ error: 'invalid_credentials' }, 401);
       }
@@ -74,7 +77,7 @@ export function createAuthRouter(
       const sessionKey = generateSessionKey();
       const uaFingerprint = await computeUaFingerprint(c.req.header('user-agent') ?? '');
 
-      sessionRepo.create(sessionId, {
+      await sessionRepo.create(sessionId, {
         userId: member.id,
         createdAt: Date.now(),
         lastSeenAt: Date.now(),
@@ -104,7 +107,7 @@ export function createAuthRouter(
       .find((s) => s.startsWith('sid='))
       ?.slice(4);
 
-    if (sessionId) sessionRepo.delete(sessionId);
+    if (sessionId) await sessionRepo.delete(sessionId);
 
     c.header(
       'Set-Cookie',

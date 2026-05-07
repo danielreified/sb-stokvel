@@ -3,6 +3,9 @@
   "compilerOptions": {
     "types": ["bun-types"],
     "paths": {
+      "@seyva/db": ["../../packages/db/src/index.ts"],
+      "@seyva/db/migrate": ["../../packages/db/src/migrate.ts"],
+      "@seyva/db/seed": ["../../packages/db/src/seed.ts"],
       "@seyva/types": ["../../packages/types/src/index.ts"],
       "@seyva/validation": ["../../packages/validation/src/index.ts"],
       "@seyva/utils": ["../../packages/utils/src/index.ts"]
@@ -10,6 +13,7 @@
   },
   "include": [
     "src",
+    "../../packages/db/src",
     "../../packages/types/src",
     "../../packages/validation/src",
     "../../packages/utils/src"
