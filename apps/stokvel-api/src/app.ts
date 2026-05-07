@@ -10,7 +10,7 @@ import { createSessionRepository } from './repository/session.js';
 import { createStokvelRepository } from './repository/stokvel.js';
 import { createAuthRouter } from './routes/auth.js';
 import { cspReportRouter } from './routes/csp-report.js';
-import { healthRouter } from './routes/health.js';
+import { createHealthRouter } from './routes/health.js';
 import { createMeRouter } from './routes/me.js';
 import { createStokvelRouter } from './routes/stokvel.js';
 import { versionRouter } from './routes/version.js';
@@ -58,7 +58,7 @@ export function createApp(db: Db): Hono {
     );
   }
 
-  app.route('/api', healthRouter);
+  app.route('/api', createHealthRouter(db));
   app.route('/api', cspReportRouter);
   app.route('/api/auth', createAuthRouter(stokvelRepo, sessionRepo));
   app.route('/api', createMeRouter(stokvelRepo, sessionRepo, authMiddleware));
