@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { eq, schema } from '@seyva/db';
 import { Hono } from 'hono';
 import { computeUaFingerprint, createAuthMiddleware } from '../middleware/auth.js';
@@ -39,10 +39,6 @@ describe('POST /api/stokvel/:stokvelId/contributions', () => {
     app = new Hono();
     app.use('*', requestIdMiddleware);
     app.route('/api/stokvel', createStokvelRouter(stokvelRepo, authMiddleware));
-  });
-
-  afterAll(async () => {
-    await db.close();
   });
 
   it('creates a contribution and returns 201', async () => {

@@ -2,6 +2,11 @@
  * Test-DB harness. Connects to the postgres_test docker service, runs the
  * Drizzle migrations once per process, and exposes truncate/seed helpers
  * for `beforeEach` to call.
+ *
+ * One DbHandle is cached at the module level and shared across every test
+ * file in the same `bun test` process. We deliberately do NOT expose a
+ * close — calling it from one file's `afterAll` would kill the pool for
+ * the next file. The connection cleans itself up when the process exits.
  */
 import { createDb, type DbHandle, sql } from '@seyva/db';
 import { runMigrations } from '@seyva/db/migrate';
