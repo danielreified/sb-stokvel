@@ -11,8 +11,6 @@ can look like for South African mobile users.
 - PWA  → https://dev.seyva.daniellourie.me
 - API  → https://api.dev.seyva.daniellourie.me
 
-Demo credentials: `+27821000001` / `1234`.
-
 ## Status
 
 This README is a placeholder.
