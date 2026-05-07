@@ -17,6 +17,7 @@
     "seed": "bun src/seed.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
     "@seyva/types": "workspace:*",
     "drizzle-orm": "^0.36.4",
     "pg": "^8.13.1"
