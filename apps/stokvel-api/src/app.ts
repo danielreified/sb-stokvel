@@ -43,10 +43,7 @@ export function createApp(db: Db): Hono {
     c.res.headers.set('X-Latest-Client-Version', VERSION_CONFIG.latestVersion);
   });
 
-  // Dev-only CORS — Vite proxy fronts the BFF in dev. In prod the API
-  // Gateway HTTP API handles preflight via its own cors_configuration
-  // (defined in the api-lambda module) so requests reach the Lambda
-  // already CORS-cleared.
+  // Dev-only CORS — Vite proxy fronts the BFF in dev.
   if (process.env.NODE_ENV !== 'production') {
     app.use(
       '/api/*',
@@ -57,6 +54,15 @@ export function createApp(db: Db): Hono {
       }),
     );
   }
+
+  // Preflight short-circuit. API Gateway HTTP API's auto-CORS does NOT
+  // intercept OPTIONS when a `$default` route exists (the catch-all
+  // forwards everything to the Lambda). Without this, browsers receive a
+  // 404 for the preflight + the actual fetch fails with a CORS error.
+  // APIGW still injects the configured allow-* headers on top of our 204,
+  // so the response shape is correct. In dev, Hono's cors() above already
+  // handles preflights — this handler is reached only in prod.
+  app.options('*', (c) => c.body(null, 204));
 
   app.route('/api', createHealthRouter(db));
   app.route('/api', cspReportRouter);

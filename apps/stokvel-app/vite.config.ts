@@ -17,8 +17,10 @@ export default defineConfig((_env) => ({
     ...(process.env.HTTPS === 'true' ? [mkcert()] : []),
     VitePWA({
       registerType: 'prompt',
-      // skipWaiting + clientsClaim both false — banking context, no surprise reloads
-      injectRegister: 'inline',
+      // skipWaiting + clientsClaim both false — banking context, no surprise reloads.
+      // injectRegister: 'script-defer' emits an external /registerSW.js instead
+      // of an inline <script>, which the prod CSP `script-src 'self'` blocks.
+      injectRegister: 'script-defer',
       devOptions: {
         enabled: true,
         type: 'module',
