@@ -70,3 +70,4 @@ crash.*.log
 # .tfvars hold secrets — committed examples are *.tfvars.example
 *.tfvars
 !*.tfvars.example
+CLAUDE.md
