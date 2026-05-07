@@ -333,7 +333,7 @@ The end-to-end specs cover: authentication (happy path + wrong PIN), navigation,
 
 **Visual regression — Docker.** Font rendering differs between macOS and Linux, which means the same component produces different pixel output on a Mac dev machine versus a Linux CI runner. To get deterministic baselines, visual regression tests only run inside a Docker container based on the official Playwright image. Baselines are committed to the repo as `*-linux.png` and regenerated with `bun run test:e2e:update-snapshots` — which also runs inside Docker. Local dev runs the rest of the suite natively for speed; only the visual tests need the container.
 
-**Pre-push hook.** The full unit test suite and a production build run on every `git push`. The build includes the bundle size check, so a push that would exceed the 200 KB budget fails before it reaches the remote.
+**Pre-push hook.** A production build runs on every `git push`. The build includes the bundle size check, so a push that would exceed the 200 KB budget fails before it reaches the remote.
 
 ---
 
