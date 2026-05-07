@@ -33,6 +33,10 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     const init: RequestInit = {
       method,
       headers: { 'Content-Type': 'application/json' },
+      // Required for cross-subdomain cookie auth (PWA at dev.seyva.* calling
+      // api.dev.seyva.*). Same-origin requests are unaffected — the browser
+      // sends cookies on those by default.
+      credentials: 'include',
     };
     if (body !== undefined) {
       init.body = JSON.stringify(body);
