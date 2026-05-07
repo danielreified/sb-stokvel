@@ -64,11 +64,9 @@ playwright/.auth/
 *.tfstate.*
 *.tfplan
 *.tfplan.*
+tfplan
 crash.log
 crash.*.log
 # .tfvars hold secrets — committed examples are *.tfvars.example
 *.tfvars
 !*.tfvars.example
-# generated-by-terragrunt files in env working directories
-infrastructure/envs/*/backend.tf
-infrastructure/envs/*/providers_generated.tf

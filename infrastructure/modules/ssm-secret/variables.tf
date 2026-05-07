@@ -3,8 +3,8 @@ variable "name" {
   type        = string
 
   validation {
-    condition     = var.name == null || can(regex("^/[a-z0-9._/-]{1,1011}$", var.name))
-    error_message = "Parameter name must start with / and use only lowercase, digits, dots, dashes, underscores, slashes."
+    condition     = var.name == null || (length(var.name) > 1 && startswith(var.name, "/"))
+    error_message = "Parameter name must start with / and be longer than 1 char. AWS rejects further violations at apply time."
   }
 }
 

@@ -16,7 +16,7 @@
     "@seyva/types": "workspace:*",
     "@seyva/utils": "workspace:*",
     "@seyva/validation": "workspace:*",
-    "hono": "^4.7.11",
+    "hono": "^4.12.12",
     "semver": "^7.7.2",
     "ua-parser-js": "^2.0.3"
   },

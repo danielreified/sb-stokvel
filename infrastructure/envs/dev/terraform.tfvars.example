@@ -1,0 +1,9 @@
+environment      = "dev"
+name_prefix      = "seyva-dev"
+apex_domain      = "daniellourie.me"
+viewer_subdomain = "dev.seyva"
+api_subdomain    = "api.dev.seyva"
+
+# database_url is intentionally NOT in this file. Pass it via env var:
+#   export TF_VAR_database_url='postgres://...'
+# so the value never lands in the working tree.

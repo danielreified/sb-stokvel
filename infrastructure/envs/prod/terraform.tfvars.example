@@ -1,0 +1,7 @@
+environment      = "prod"
+name_prefix      = "seyva-prod"
+apex_domain      = "daniellourie.me"
+viewer_subdomain = "seyva"
+api_subdomain    = "api.seyva"
+
+# database_url passed via TF_VAR_database_url env var, see envs/dev/.example.

@@ -96,6 +96,8 @@ resource "aws_cloudfront_cache_policy" "no_cache" {
   max_ttl     = 0
   min_ttl     = 0
 
+  # CloudFront rejects encoding negotiation params when caching is disabled
+  # (TTL all 0). Encoding is per-request anyway, so omitting them is correct.
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
       cookie_behavior = "none"
@@ -106,8 +108,7 @@ resource "aws_cloudfront_cache_policy" "no_cache" {
     query_strings_config {
       query_string_behavior = "none"
     }
-    enable_accept_encoding_gzip   = true
-    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip = false
   }
 }
 
