@@ -13,10 +13,10 @@ export const VERSION_CONFIG = {
    * Clients older than minVersion are blocked with updateLevel: 'forced'.
    * Set this forward when a breaking change ships.
    */
-  minVersion: '0.1.0',
+  minVersion: '0.2.0',
 
   /** Latest published version — used to nudge clients that are behind but not blocked. */
-  latestVersion: process.env.APP_VERSION ?? '0.1.0',
+  latestVersion: process.env.APP_VERSION ?? '0.2.0',
 
   /**
    * Global override. Normally derived from client/minVersion comparison.
