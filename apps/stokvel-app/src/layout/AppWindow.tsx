@@ -101,7 +101,7 @@ export function AppWindow({ member, children }: AppWindowProps) {
                       return (
                         <SidebarMenuItem key={item.to}>
                           <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
-                            <Link to={item.to}>
+                            <Link to={item.to} aria-label={label}>
                               <Icon className="size-[18px]" aria-hidden="true" />
                               <span>{label}</span>
                             </Link>
@@ -126,7 +126,7 @@ export function AppWindow({ member, children }: AppWindowProps) {
                     tooltip={member.name}
                     className="h-auto"
                   >
-                    <Link to="/profile">
+                    <Link to="/profile" aria-label={member.name}>
                       <MemberAvatar name={member.name} size="xs" tone="solid" />
                       <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
                         <p className="truncate text-xs font-medium">{member.name}</p>
@@ -165,7 +165,12 @@ export function AppWindow({ member, children }: AppWindowProps) {
             </header>
           )}
 
-          <div className="flex-1 overflow-y-auto">{children}</div>
+          {/* tabIndex makes the scrollable region keyboard-accessible — axe's
+              scrollable-region-focusable rule, see docs/architecture/testing.md. */}
+          {/* biome-ignore lint/a11y/noNoninteractiveTabindex: required by WCAG keyboard scroll */}
+          <div className="flex-1 overflow-y-auto focus:outline-none" tabIndex={0}>
+            {children}
+          </div>
         </div>
       </div>
     </SidebarProvider>

@@ -43,6 +43,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+# Lighthouse CI reports
+.lighthouseci/
+
 # Visual regression baselines: only Linux PNGs are canonical (generated from
 # the Docker rig). Native runs on Mac/Windows produce host-suffixed PNGs we
 # don't want in git.

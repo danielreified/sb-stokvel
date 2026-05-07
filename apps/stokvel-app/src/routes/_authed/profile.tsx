@@ -72,7 +72,7 @@ function ProfilePage() {
       <Button
         variant="outline"
         onClick={() => void signOut()}
-        className="w-full border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="w-full border-red-300 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
       >
         {copy.auth.logoutButton}
       </Button>

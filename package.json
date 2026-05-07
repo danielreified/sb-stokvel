@@ -20,6 +20,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:docker": "docker build -f Dockerfile.test -t seyva-test . && docker run --rm -v \"$PWD/tests\":/workspace/tests -v \"$PWD/test-results\":/workspace/test-results seyva-test",
     "test:e2e:update-snapshots": "docker build -f Dockerfile.test -t seyva-test . && docker run --rm -v \"$PWD/tests\":/workspace/tests -v \"$PWD/test-results\":/workspace/test-results seyva-test bun run test:e2e -- --update-snapshots",
+    "test:lighthouse": "lhci autorun",
     "typecheck": "turbo run typecheck",
     "format": "biome format --write .",
     "prepare": "husky"
@@ -28,7 +29,9 @@
     "*.{ts,tsx,js,jsx,json,jsonc}": "biome check --write --no-errors-on-unmatched"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@biomejs/biome": "^2.4.14",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
