@@ -56,6 +56,42 @@ In development, Vite proxies `/api/*` to `localhost:3000` so the frontend uses r
 
 ---
 
+## Repo structure
+
+```
+seyva-stokvel/
+├── apps/
+│   ├── stokvel-app/          # Vite PWA — the frontend (this is the main thing)
+│   │   ├── src/
+│   │   │   ├── routes/       # TanStack Router file-based routes
+│   │   │   ├── features/     # Feature folders (auth, dashboard, contributions, members, pwa)
+│   │   │   ├── components/   # Generic shared components
+│   │   │   ├── layout/       # App chrome (nav, PIN lock screen, update prompt)
+│   │   │   ├── lib/          # Core utilities (crypto, IDB cache, version guard, logger)
+│   │   │   └── copy/         # All user-facing strings (EN, ZU, AF)
+│   │   └── vite.config.ts
+│   └── stokvel-api/          # Hono BFF — session auth, security headers, data endpoints
+│
+├── packages/
+│   ├── ui/                   # shadcn/ui components + Storybook
+│   ├── api-client/           # Typed BFF client factory (no React dependency)
+│   ├── validation/           # Shared Zod schemas (used by both BFF and PWA)
+│   ├── types/                # Shared TypeScript types
+│   ├── utils/                # SA-specific formatters (money, phone, date)
+│   └── db/                   # Drizzle ORM schema, migrations, seed
+│
+├── tests/
+│   └── e2e/                  # Playwright end-to-end tests (4-way browser matrix)
+│
+├── docs/
+│   ├── decisions.md          # 15 architectural decision records
+│   └── architecture/         # Deep-dives on persistence, security, testing, i18n
+│
+└── infrastructure/           # Terraform — AWS CloudFront + Lambda + SSM
+```
+
+---
+
 ## Stack decisions
 
 ### Vite + React — not Next.js
