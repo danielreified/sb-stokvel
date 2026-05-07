@@ -23,10 +23,13 @@
     "test:lighthouse": "lhci autorun",
     "typecheck": "turbo run typecheck",
     "format": "biome format --write .",
+    "tf:fmt": "terraform fmt -recursive infrastructure/",
+    "tf:check": "./scripts/check-terraform.sh",
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,jsonc}": "biome check --write --no-errors-on-unmatched"
+    "*.{ts,tsx,js,jsx,json,jsonc}": "biome check --write --no-errors-on-unmatched",
+    "*.tf": "terraform fmt -write"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
