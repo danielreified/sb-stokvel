@@ -37,7 +37,16 @@
       "style": {
         "useImportType": "error",
         "useExportType": "error",
-        "noNonNullAssertion": "warn"
+        "noNonNullAssertion": "warn",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@tanstack/react-query-devtools": "Devtools must only be lazy-imported in App.tsx — gated by import.meta.env.DEV.",
+              "@tanstack/router-devtools": "Devtools must only be lazy-imported in App.tsx — gated by import.meta.env.DEV."
+            }
+          }
+        }
       },
       "correctness": {
         "noUnusedVariables": "error",
@@ -45,6 +54,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["apps/stokvel-app/src/App.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "single",

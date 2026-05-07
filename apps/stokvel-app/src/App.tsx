@@ -22,6 +22,8 @@ export const router = createRouter({
   routeTree,
   context: {
     queryClient,
+    // reason: AuthState is required by route context but isn't available
+    // until AppWithAuth resolves it; the cast keeps the initial context type-safe.
     auth: undefined as never,
   },
 });

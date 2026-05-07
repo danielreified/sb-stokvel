@@ -12,6 +12,8 @@ export function useInstallPrompt() {
   useEffect(() => {
     function onBeforeInstallPrompt(e: Event) {
       e.preventDefault();
+      // reason: BeforeInstallPromptEvent isn't in lib.dom yet; the runtime
+      // event matches the interface declared in src/lib/globals.d.ts.
       deferredPrompt.current = e as BeforeInstallPromptEvent;
       setCanInstall(true);
     }

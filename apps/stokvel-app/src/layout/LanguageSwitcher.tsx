@@ -44,6 +44,8 @@ export function LanguageSwitcher() {
       <DropdownMenuContent align="end" className="min-w-[10rem]">
         <DropdownMenuRadioGroup
           value={locale}
+          // reason: DropdownMenuRadioGroup hands back string; we constrain
+          // values to the Locale union elsewhere (LOCALES list).
           onValueChange={(v) => localeStore.setLocale(v as Locale)}
         >
           {LOCALES.map((l) => (

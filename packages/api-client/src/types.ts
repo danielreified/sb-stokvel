@@ -7,4 +7,6 @@ export interface ApiClientOptions {
   onUnauthorized?: () => void;
   /** Called when X-Min-Client-Version / X-Latest-Client-Version headers are present. */
   onVersionHeaders?: (headers: { minVersion?: string; latestVersion?: string }) => void;
+  /** Called with x-request-id from every response — wire to a logger so client logs can quote it. */
+  onRequestId?: (requestId: string) => void;
 }

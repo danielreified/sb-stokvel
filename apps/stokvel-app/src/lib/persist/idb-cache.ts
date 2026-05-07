@@ -116,6 +116,9 @@ export async function read<T>(key: string): Promise<ReadResult<T> | null> {
   }
 
   try {
+    // reason: caller declares <T>; we trust the shape because writes go
+    // through the typed write<T>() and a tampered blob would have already
+    // failed the AES-GCM auth tag check above.
     return { data: JSON.parse(plaintext) as T, cachedAt: entry.cachedAt };
   } catch {
     logger.warn('idb_cache_parse_failed', { key });

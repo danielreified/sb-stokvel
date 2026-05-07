@@ -11,6 +11,8 @@ function loadState(): VersionGuardState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { updateLevel: 'none', lastSuccessfulCheckAt: null };
+    // reason: localStorage roundtrip; on shape drift we fall through to
+    // the catch and return the default — see CACHE_SCHEMA_VERSION buster.
     return JSON.parse(raw) as VersionGuardState;
   } catch {
     return { updateLevel: 'none', lastSuccessfulCheckAt: null };

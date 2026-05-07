@@ -14,6 +14,8 @@ export interface ContributionFilters {
 }
 
 const filterKey = (filters: ContributionFilters): string =>
+  // reason: Object.keys widens to string[]; the iterated keys are guaranteed
+  // members of ContributionFilters because that's the input type.
   Object.keys(filters)
     .filter((k) => filters[k as keyof ContributionFilters] !== undefined)
     .sort()

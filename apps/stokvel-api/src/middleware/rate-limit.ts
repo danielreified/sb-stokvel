@@ -39,7 +39,14 @@ function createBucket(windowMs: number, maxAttempts: number) {
   };
 }
 
-/** Layered rate limiter for POST /api/auth/login. See CLAUDE.md for bucket rationale. */
+/**
+ * Layered rate limiter for POST /api/auth/login. See CLAUDE.md for bucket rationale.
+ *
+ * DEMO: buckets live in this process's memory. Across multi-process or
+ * multi-region deploys they reset per instance — so an attacker cycling
+ * through replicas could amplify by N. Production should back this with
+ * Redis (atomic INCR + EXPIRE) or push it to the WAF layer.
+ */
 const perPhoneBucket = createBucket(WINDOW_MS, 5);
 const perIpBucket = createBucket(WINDOW_MS, 200);
 

@@ -71,7 +71,11 @@ export function MakeContributionForm({
       )}
       {mutation.isError && (
         <p role="alert" className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
-          {copy.errors.unexpected}
+          {/* Surface the server's specific message when present (e.g. "amount must be positive")
+              instead of a generic fallback — banking UX needs precision. */}
+          {mutation.error instanceof Error && mutation.error.message
+            ? mutation.error.message
+            : copy.errors.unexpected}
         </p>
       )}
 

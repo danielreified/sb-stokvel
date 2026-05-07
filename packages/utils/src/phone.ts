@@ -4,7 +4,7 @@
  */
 export function formatPhone(phone: string): string {
   if (!phone.startsWith('+27') || phone.length !== 12) return phone;
-  const local = '0' + phone.slice(3);
+  const local = `0${phone.slice(3)}`;
   return `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`;
 }
 

@@ -1,3 +1,6 @@
+// Barrel exports are tree-shaken safely because package.json declares
+// `sideEffects: ["*.css"]` — Rollup tracks named-export usage through
+// `export *`. Verified by `apps/stokvel-app/scripts/check-bundle-size.ts`.
 export { cn } from './cn.js';
 export * from './components/accordion.js';
 export * from './components/alert.js';

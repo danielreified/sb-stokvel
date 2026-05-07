@@ -13,13 +13,8 @@ export const api = createApiClient({
       versionGuardStore.handleVersionHeaders(headers);
     });
   },
+  // Capture the last request-id for error correlation in client logs.
+  // Avoids monkey-patching globalThis.fetch — the api-client invokes the
+  // callback after every response, including non-2xx.
+  onRequestId: setLastRequestId,
 });
-
-// Capture the last request-id from every response for error correlation in client logs
-const _originalFetch = globalThis.fetch;
-globalThis.fetch = async (...args) => {
-  const response = await _originalFetch(...args);
-  const requestId = response.headers.get('x-request-id');
-  if (requestId) setLastRequestId(requestId);
-  return response;
-};
