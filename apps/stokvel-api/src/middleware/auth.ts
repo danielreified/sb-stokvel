@@ -1,3 +1,4 @@
+import { getCookie } from 'hono/cookie';
 import { createFactory } from 'hono/factory';
 import { UAParser } from 'ua-parser-js';
 import { logger } from '../lib/logger.js';
@@ -26,13 +27,7 @@ const factory = createFactory();
 
 export function createAuthMiddleware(sessionRepo: ReturnType<typeof createSessionRepository>) {
   return factory.createMiddleware(async (c, next) => {
-    const cookieHeader = c.req.header('cookie') ?? '';
-    const sessionId = cookieHeader
-      .split(';')
-      .map((s) => s.trim())
-      .find((s) => s.startsWith('sid='))
-      ?.slice(4);
-
+    const sessionId = getCookie(c, 'sid');
     if (!sessionId) {
       return c.json({ error: 'unauthorized' }, 401);
     }

@@ -1,4 +1,5 @@
 import type { UpdateLevel } from '@seyva/types';
+import { deriveUpdateLevel, isHigherLevel } from '@seyva/utils';
 
 interface VersionGuardState {
   updateLevel: UpdateLevel;
@@ -33,9 +34,23 @@ const listeners = new Set<() => void>();
 export const versionGuardStore = {
   getState: (): Readonly<VersionGuardState> => state,
 
-  handleVersionHeaders: (_headers: { minVersion?: string; latestVersion?: string }): void => {
-    // Version-check response via API interceptor — level will be resolved on next poll
-    // Full tier logic lives in the polling loop in version-guard/poll.ts
+  /**
+   * Header-only path: derives a tier from minVersion/latestVersion sent on
+   * every authenticated response and **bumps up only**. We deliberately
+   * never lower the tier here — only the full /api/app/version-check poll
+   * has the `globalOverride` context, and downgrading on partial info
+   * could clear an in-flight kill-switch between polls.
+   */
+  handleVersionHeaders: (headers: { minVersion?: string; latestVersion?: string }): void => {
+    const { minVersion, latestVersion } = headers;
+    if (!minVersion || !latestVersion) return;
+
+    const next = deriveUpdateLevel(__APP_VERSION__, minVersion, latestVersion, 'none');
+    if (!isHigherLevel(next, state.updateLevel)) return;
+
+    state = { ...state, updateLevel: next };
+    saveState(state);
+    for (const fn of listeners) fn();
   },
 
   setFromVersionCheck: (updateLevel: UpdateLevel): void => {

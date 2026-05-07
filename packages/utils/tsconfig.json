@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "paths": {
+      "@seyva/types": ["../types/src/index.ts"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../types/src"]
 }

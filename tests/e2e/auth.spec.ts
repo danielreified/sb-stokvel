@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-const DEMO_PHONE = '+27821000001';
-const DEMO_PIN = '1234';
+import { DEMO_PHONE, DEMO_PIN } from './_helpers.js';
 
 // These tests exercise the login flow itself, so they must start
 // unauthenticated regardless of the project-level storageState.

@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
+import { DEMO_PHONE, DEMO_PIN } from '@seyva/db/seed';
 
-export const DEMO_PHONE = '+27821000001';
-export const DEMO_PIN = '1234';
+export { DEMO_PHONE, DEMO_PIN };
 
 /** Sign in via the login UI. Leaves the page on /dashboard when it returns. */
 export async function signIn(page: Page) {

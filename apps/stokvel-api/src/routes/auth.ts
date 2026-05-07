@@ -1,27 +1,21 @@
+import { DEMO_PHONE, DEMO_PIN } from '@seyva/db/seed';
 import { LoginSchema } from '@seyva/validation';
 import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { logger } from '../lib/logger.js';
 import { computeUaFingerprint } from '../middleware/auth.js';
 import { loginRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { createSessionRepository } from '../repository/session.js';
 import type { createStokvelRepository } from '../repository/stokvel.js';
 
-/** DEMO: hardcoded credentials. Replace with real auth in production. */
-export const DEMO_PHONE = '+27821000001';
-export const DEMO_PIN = '1234';
-
 const CONSTANT_RESPONSE_MS = 250;
+const SESSION_COOKIE_MAX_AGE = 43200;
 
 /**
- * The Secure cookie flag is HTTPS-only — WebKit (Safari) refuses to store
- * Secure cookies on http://localhost, breaking the dev/test flow. Emit
- * `Secure` only when the request itself was HTTPS so prod still gets it.
+ * Pad failed-login responses to a constant time so an attacker can't tell
+ * "wrong PIN" from "no such user" by timing alone. CLAUDE.md mandates
+ * identical-shape, identical-time responses across every failure path.
  */
-function secureFlag(url: string): string {
-  return new URL(url).protocol === 'https:' ? ' Secure;' : '';
-}
-
-/** Pad response time to ~250ms to prevent timing-based user enumeration. */
 async function constantTime<T>(fn: () => Promise<T>): Promise<T> {
   const [result] = await Promise.all([
     fn(),
@@ -33,6 +27,22 @@ async function constantTime<T>(fn: () => Promise<T>): Promise<T> {
 function generateSessionKey(): string {
   const raw = crypto.getRandomValues(new Uint8Array(32));
   return btoa(String.fromCharCode(...raw));
+}
+
+/**
+ * Cookie attribute set used by both login (set sid) and logout (clear sid).
+ *
+ * The `secure` flag is HTTPS-only — WebKit (Safari) refuses to store Secure
+ * cookies on http://localhost, breaking the dev/test flow. We let `secure`
+ * default to off and explicitly enable it when the request URL is HTTPS.
+ */
+function sessionCookieOptions(c: { req: { url: string } }) {
+  return {
+    httpOnly: true,
+    secure: new URL(c.req.url).protocol === 'https:',
+    sameSite: 'Lax' as const,
+    path: '/',
+  };
 }
 
 export function createAuthRouter(
@@ -87,10 +97,10 @@ export function createAuthRouter(
 
       logger.info('login_success', { requestId, memberId: member.id });
 
-      c.header(
-        'Set-Cookie',
-        `sid=${sessionId}; HttpOnly;${secureFlag(c.req.url)} SameSite=Lax; Path=/; Max-Age=43200`,
-      );
+      setCookie(c, 'sid', sessionId, {
+        ...sessionCookieOptions(c),
+        maxAge: SESSION_COOKIE_MAX_AGE,
+      });
       // SECURITY: Cache-Control prevents proxies/bfcache caching the AES key
       c.header('Cache-Control', 'no-store, private');
       c.header('Pragma', 'no-cache');
@@ -100,19 +110,10 @@ export function createAuthRouter(
   });
 
   router.post('/logout', async (c) => {
-    const cookieHeader = c.req.header('cookie') ?? '';
-    const sessionId = cookieHeader
-      .split(';')
-      .map((s) => s.trim())
-      .find((s) => s.startsWith('sid='))
-      ?.slice(4);
-
+    const sessionId = getCookie(c, 'sid');
     if (sessionId) await sessionRepo.delete(sessionId);
 
-    c.header(
-      'Set-Cookie',
-      `sid=; HttpOnly;${secureFlag(c.req.url)} SameSite=Lax; Path=/; Max-Age=0`,
-    );
+    deleteCookie(c, 'sid', sessionCookieOptions(c));
     return c.body(null, 204);
   });
 

@@ -1,19 +1,8 @@
-import type { UpdateLevel } from '@seyva/types';
+import { deriveUpdateLevel } from '@seyva/utils';
 import { Hono } from 'hono';
-import semver from 'semver';
 import { VERSION_CONFIG } from '../config/versions.js';
 
-export function deriveUpdateLevel(
-  clientVersion: string,
-  minVersion: string,
-  latestVersion: string,
-  globalOverride: UpdateLevel | 'none',
-): UpdateLevel {
-  if (globalOverride !== 'none') return globalOverride;
-  if (semver.lt(clientVersion, minVersion)) return 'forced';
-  if (semver.lt(clientVersion, latestVersion)) return 'optional';
-  return 'none';
-}
+export { deriveUpdateLevel };
 
 export const versionRouter = new Hono();
 
