@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { DEMO_PHONE, DEMO_PIN } from './_helpers.js';
 
+// DEMO_PHONE/DEMO_PIN are duplicated from packages/db/src/seed.ts —
+// see _helpers.ts for the rationale.
+
 // These tests exercise the login flow itself, so they must start
 // unauthenticated regardless of the project-level storageState.
 test.use({ storageState: { cookies: [], origins: [] } });
