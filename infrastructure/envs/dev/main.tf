@@ -55,5 +55,12 @@ module "site" {
   name_prefix      = var.name_prefix
   domain_fqdn      = local.viewer_fqdn
   hosted_zone_name = var.apex_domain
-  tags             = local.common_tags
+
+  # PWA fetches the BFF cross-subdomain — connect-src must whitelist it.
+  csp_connect_src = ["https://${local.api_fqdn}"]
+
+  # CSP report-uri lives on the BFF; cross-origin reports are fine.
+  csp_report_uri = "https://${local.api_fqdn}/api/csp-report"
+
+  tags = local.common_tags
 }

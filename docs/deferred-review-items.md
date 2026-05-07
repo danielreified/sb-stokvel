@@ -138,3 +138,32 @@ repository module would let tests pass a hand-rolled impl. Worth doing
 
 ### `csp-report.ts` rate-limiter is inline; `rate-limit.ts` factored
 Either inline both or factor both. Currently asymmetric.
+
+## UX polish
+
+### Specialise update UX for installed PWA vs browser tab
+Same code, same update mechanism — but the user expectations differ.
+Browser tab can refresh easily, so a subtle toast suffices. Installed
+PWA users can't easily refresh and may have the app backgrounded for
+days, so a more prominent persistent banner is warranted.
+
+Detect with:
+```ts
+const isInstalledPWA = window.matchMedia('(display-mode: standalone)').matches
+                    || (navigator as { standalone?: boolean }).standalone === true;
+```
+
+The forced gate stays identical in both contexts (security override).
+Difference is for the optional/recommended tiers + the SW
+"new content available" prompt.
+
+### Centre the forced-update gate properly
+Today the gate renders in the bottom-right of the viewport instead of
+centred (see `ForcedUpdateGate.tsx` — the flexbox parent is missing
+something). Cosmetic but jarring on first impression.
+
+### Test the upgrade flow on real installed PWAs
+30-min QA pass on a real iOS Safari (Add to Home Screen) and Android
+Chrome (Install App) to confirm `forceUpdate()` actually re-fetches the
+new bundle and the gate clears. Should work — but real-device-only
+quirks happen.

@@ -61,7 +61,7 @@ export function createApp(db: Db): Hono {
   app.route('/api', healthRouter);
   app.route('/api', cspReportRouter);
   app.route('/api/auth', createAuthRouter(stokvelRepo, sessionRepo));
-  app.route('/api', createMeRouter(stokvelRepo, authMiddleware));
+  app.route('/api', createMeRouter(stokvelRepo, sessionRepo, authMiddleware));
   app.route('/api/stokvel', createStokvelRouter(stokvelRepo, authMiddleware));
   app.route('/api', versionRouter);
 

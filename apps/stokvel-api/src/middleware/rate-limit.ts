@@ -1,4 +1,5 @@
 import type { MiddlewareHandler } from 'hono';
+import { CONSTANT_LOGIN_RESPONSE_MS, constantTime } from '../lib/constant-time.js';
 import { logger } from '../lib/logger.js';
 
 interface Bucket {
@@ -65,27 +66,31 @@ export const loginRateLimitMiddleware: MiddlewareHandler = async (c, next) => {
   const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
 
   // Pre-flight: refuse if either bucket is already saturated by past failures.
+  // SECURITY: pad to the same wall-clock as a normal failed login so an
+  // attacker can't tell "rate-limited" from "wrong PIN" by timing.
   if (!perPhoneBucket.canAttempt(phone)) {
     const retryAfter = perPhoneBucket.retryAfterSeconds(phone);
     logger.warn('rate_limit_per_phone', { requestId, phone });
-    c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
-      status: 401,
-      headers: {
-        'Content-Type': 'application/json',
-        'Retry-After': String(retryAfter),
-      },
-    });
-    return;
+    return constantTime(async () => {
+      c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(retryAfter),
+        },
+      });
+    }, CONSTANT_LOGIN_RESPONSE_MS);
   }
 
   if (!perIpBucket.canAttempt(clientIp)) {
     logger.warn('rate_limit_per_ip', { requestId });
-    // SECURITY: constant-time, identical-shape — do not differentiate
-    c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return;
+    return constantTime(async () => {
+      // SECURITY: constant-time, identical-shape — do not differentiate
+      c.res = new Response(JSON.stringify({ error: 'invalid_credentials' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }, CONSTANT_LOGIN_RESPONSE_MS);
   }
 
   await next();

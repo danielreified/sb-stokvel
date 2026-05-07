@@ -29,6 +29,27 @@ variable "price_class" {
   }
 }
 
+variable "csp_connect_src" {
+  description = <<-EOT
+    Extra origins added to the CSP `connect-src` directive (in addition to
+    'self'). Use this for the API origin the PWA fetches cross-subdomain to,
+    e.g. ["https://api.dev.seyva.daniellourie.me"]. Without it the browser
+    blocks fetches from the deployed bundle.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+variable "csp_report_uri" {
+  description = <<-EOT
+    URL the browser POSTs CSP violation reports to. Cross-origin is fine
+    (e.g. the BFF's /api/csp-report on api.<env>.<apex>). Empty string =
+    no report-uri directive emitted.
+  EOT
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Tags merged onto every resource."
   type        = map(string)

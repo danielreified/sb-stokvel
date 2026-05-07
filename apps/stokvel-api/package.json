@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --env-file=.env --watch src/index.ts",
-    "build": "bun build src/lambda.ts --outdir dist --target node --minify",
+    "build": "NODE_ENV=production bun build src/lambda.ts --outdir dist --target node --minify",
     "start": "bun dist/lambda.js",
     "typecheck": "tsc --noEmit",
     "test": "bun test"

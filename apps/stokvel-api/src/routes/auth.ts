@@ -2,27 +2,14 @@ import { DEMO_PHONE, DEMO_PIN } from '@seyva/db/seed';
 import { LoginSchema } from '@seyva/validation';
 import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { CONSTANT_LOGIN_RESPONSE_MS, constantTime } from '../lib/constant-time.js';
 import { logger } from '../lib/logger.js';
 import { computeUaFingerprint } from '../middleware/auth.js';
 import { loginRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { createSessionRepository } from '../repository/session.js';
 import type { createStokvelRepository } from '../repository/stokvel.js';
 
-const CONSTANT_RESPONSE_MS = 250;
 const SESSION_COOKIE_MAX_AGE = 43200;
-
-/**
- * Pad failed-login responses to a constant time so an attacker can't tell
- * "wrong PIN" from "no such user" by timing alone. CLAUDE.md mandates
- * identical-shape, identical-time responses across every failure path.
- */
-async function constantTime<T>(fn: () => Promise<T>): Promise<T> {
-  const [result] = await Promise.all([
-    fn(),
-    new Promise<void>((resolve) => setTimeout(resolve, CONSTANT_RESPONSE_MS)),
-  ]);
-  return result;
-}
 
 function generateSessionKey(): string {
   const raw = crypto.getRandomValues(new Uint8Array(32));
@@ -55,6 +42,15 @@ export function createAuthRouter(
     const requestId = c.get('requestId');
     // SECURITY: never log this body — it contains phone + PIN
     return constantTime(async () => {
+      // SECURITY: refuse a missing User-Agent. The fingerprint of '' matches
+      // itself, so UA-binding becomes tautological for an attacker who
+      // strips the header. Any legitimate browser sends a UA.
+      const userAgent = c.req.header('user-agent');
+      if (!userAgent) {
+        logger.warn('login_missing_ua', { requestId });
+        return c.json({ error: 'invalid_credentials' }, 401);
+      }
+
       let body: unknown;
       try {
         body = await c.req.json();
@@ -85,7 +81,7 @@ export function createAuthRouter(
 
       const sessionId = crypto.randomUUID();
       const sessionKey = generateSessionKey();
-      const uaFingerprint = await computeUaFingerprint(c.req.header('user-agent') ?? '');
+      const uaFingerprint = await computeUaFingerprint(userAgent);
 
       await sessionRepo.create(sessionId, {
         userId: member.id,
@@ -106,7 +102,7 @@ export function createAuthRouter(
       c.header('Pragma', 'no-cache');
 
       return c.json({ member, sessionKey });
-    });
+    }, CONSTANT_LOGIN_RESPONSE_MS);
   });
 
   router.post('/logout', async (c) => {

@@ -37,7 +37,18 @@ export function createAuthMiddleware(sessionRepo: ReturnType<typeof createSessio
       return c.json({ error: 'unauthorized' }, 401);
     }
 
-    const incomingFingerprint = await computeUaFingerprint(c.req.header('user-agent') ?? '');
+    // SECURITY: refuse a request without a User-Agent. The fingerprint of
+    // the empty string matches itself, so UA-binding silently passes for a
+    // cookie-replay attempt that strips the UA header. Destroy the session
+    // and 401 — same shape as the not-found case.
+    const userAgent = c.req.header('user-agent');
+    if (!userAgent) {
+      await sessionRepo.delete(sessionId);
+      logger.info('session_invalidated', { requestId: c.get('requestId'), reason: 'ua_missing' });
+      return c.json({ error: 'unauthorized' }, 401);
+    }
+
+    const incomingFingerprint = await computeUaFingerprint(userAgent);
     const check = sessionRepo.isValid(session, incomingFingerprint);
     if (!check.valid) {
       await sessionRepo.delete(sessionId);

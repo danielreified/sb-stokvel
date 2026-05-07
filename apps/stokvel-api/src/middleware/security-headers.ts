@@ -12,7 +12,11 @@ export const securityHeadersMiddleware: MiddlewareHandler = async (c, next) => {
 
   const csp = isDev
     ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws:; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-ancestors 'none';"
-    : "default-src 'self'; script-src 'self' 'strict-dynamic'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; report-to /api/csp-report;";
+    : // `report-uri` is the legacy directive but it's still honoured by every
+      // shipping browser. The newer `report-to` requires a paired
+      // `Reporting-Endpoints` response header — we use the legacy form so
+      // CSP reports actually arrive.
+      "default-src 'self'; script-src 'self' 'strict-dynamic'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; report-uri /api/csp-report;";
 
   c.res.headers.set('Content-Security-Policy', csp);
   c.res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

@@ -133,26 +133,100 @@ resource "aws_cloudfront_cache_policy" "immutable" {
   }
 }
 
-resource "aws_cloudfront_response_headers_policy" "site" {
-  name = "${var.name_prefix}-pwa-headers"
+###############################################################################
+# Two response-headers policies: same security baseline (CSP + HSTS + frame
+# + content-type + referrer), but different Cache-Control:
+#
+#   - `no_cache`   → applied to index.html, sw.js, manifest, default behaviour.
+#                    Belt-and-braces for the PWA-update path: the cache_policy
+#                    already prevents CloudFront edge caching, and this header
+#                    prevents corporate proxies + browser disk cache from
+#                    holding the stale shell.
+#
+#   - `immutable`  → applied to /assets/* (Vite content-hashed). 1-year cache,
+#                    `immutable` so re-validating browsers don't even ask.
+###############################################################################
+
+locals {
+  csp_security_headers = {
+    strict_transport_security = {
+      max_age            = 31536000
+      include_subdomains = true
+      preload            = false
+    }
+    frame_option    = "DENY"
+    referrer_policy = "strict-origin-when-cross-origin"
+  }
+}
+
+resource "aws_cloudfront_response_headers_policy" "site_no_cache" {
+  name = "${var.name_prefix}-pwa-no-cache-headers"
 
   security_headers_config {
     strict_transport_security {
-      access_control_max_age_sec = 31536000
-      include_subdomains         = true
-      preload                    = false
+      access_control_max_age_sec = local.csp_security_headers.strict_transport_security.max_age
+      include_subdomains         = local.csp_security_headers.strict_transport_security.include_subdomains
+      preload                    = local.csp_security_headers.strict_transport_security.preload
       override                   = true
     }
     content_type_options {
       override = true
     }
     frame_options {
-      frame_option = "DENY"
+      frame_option = local.csp_security_headers.frame_option
       override     = true
     }
     referrer_policy {
-      referrer_policy = "strict-origin-when-cross-origin"
+      referrer_policy = local.csp_security_headers.referrer_policy
       override        = true
+    }
+    content_security_policy {
+      content_security_policy = local.csp_value
+      override                = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "no-cache, must-revalidate"
+      override = true
+    }
+  }
+}
+
+resource "aws_cloudfront_response_headers_policy" "site_immutable" {
+  name = "${var.name_prefix}-pwa-immutable-headers"
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = local.csp_security_headers.strict_transport_security.max_age
+      include_subdomains         = local.csp_security_headers.strict_transport_security.include_subdomains
+      preload                    = local.csp_security_headers.strict_transport_security.preload
+      override                   = true
+    }
+    content_type_options {
+      override = true
+    }
+    frame_options {
+      frame_option = local.csp_security_headers.frame_option
+      override     = true
+    }
+    referrer_policy {
+      referrer_policy = local.csp_security_headers.referrer_policy
+      override        = true
+    }
+    content_security_policy {
+      content_security_policy = local.csp_value
+      override                = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "public, max-age=31536000, immutable"
+      override = true
     }
   }
 }
@@ -190,7 +264,7 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site_no_cache.id
   }
 
   # Hashed assets (Vite emits /assets/*-[hash].{js,css,...}) → 1 year immutable
@@ -202,7 +276,7 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site_immutable.id
   }
 
   # Service worker — never cache. Caching sw.js even briefly is the classic way
@@ -215,7 +289,7 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site_no_cache.id
   }
 
   ordered_cache_behavior {
@@ -226,7 +300,7 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site_no_cache.id
   }
 
   # SPA fallback — TanStack Router uses client-side routing, so deep links

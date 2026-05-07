@@ -1,4 +1,5 @@
 import { GetParametersCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { logger } from './logger.js';
 
 /**
  * Cold-start helper that lifts SSM SecureString values into `process.env`.
@@ -38,6 +39,13 @@ export async function loadSecretsFromSsm(): Promise<void> {
   const res = await ssm.send(
     new GetParametersCommand({ Names: namesToFetch, WithDecryption: true }),
   );
+
+  // SSM groups bad names under `InvalidParameters` instead of throwing —
+  // surface them so a typo in *_PARAM doesn't manifest as a cryptic
+  // "DATABASE_URL not set after SSM load" further up the stack.
+  if (res.InvalidParameters && res.InvalidParameters.length > 0) {
+    logger.warn('ssm_invalid_parameters', { names: res.InvalidParameters });
+  }
 
   for (const param of res.Parameters ?? []) {
     if (!param.Name || !param.Value) continue;
