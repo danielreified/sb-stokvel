@@ -77,6 +77,11 @@ function LoginPage() {
 
   // Bare AppWindow for installed PWA (feels native, no SB chrome);
   // MarketingShell on the web tab so the demo reads as a Standard Bank
-  // product page. See _authed.tsx for the same split.
-  return isStandalone ? inner : <MarketingShell>{inner}</MarketingShell>;
+  // product page. See _authed.tsx for the same split + the height
+  // wrapper rationale.
+  return isStandalone ? (
+    <div className="h-dvh w-screen">{inner}</div>
+  ) : (
+    <MarketingShell>{inner}</MarketingShell>
+  );
 }

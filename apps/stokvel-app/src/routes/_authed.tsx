@@ -136,10 +136,17 @@ function AuthedLayout() {
     </AppWindow>
   );
 
+  // AppWindow uses `h-full` and relies on its parent for height.
+  // MarketingShell provides a sized box; bare standalone needs an
+  // explicit viewport-filling wrapper.
   return (
     <ForcedUpdateGate>
       <RecommendedUpdateBanner />
-      {isStandalone ? shell : <MarketingShell>{shell}</MarketingShell>}
+      {isStandalone ? (
+        <div className="h-dvh w-screen">{shell}</div>
+      ) : (
+        <MarketingShell>{shell}</MarketingShell>
+      )}
     </ForcedUpdateGate>
   );
 }
