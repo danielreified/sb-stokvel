@@ -1,5 +1,6 @@
 import { ArrowRight, Download, Info, Smartphone, WifiOff } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useInstallPrompt } from '../features/pwa/use-install-prompt.js';
 
 interface CardProps {
   icon: ReactNode;
@@ -25,6 +26,36 @@ function GlassCard({ icon, title, body, cta, footer }: CardProps) {
   );
 }
 
+/**
+ * Install button. Three runtime states:
+ *   - Chromium with beforeinstallprompt fired → triggers the native prompt.
+ *   - Already-installed PWA → button hidden (appinstalled clears canInstall).
+ *   - Browser without the event (Safari + iOS) → renders a hint instead of
+ *     the button, since iOS install is manual via Share → Add to Home Screen.
+ */
+function InstallCta() {
+  const { canInstall, triggerInstall } = useInstallPrompt();
+
+  if (!canInstall) {
+    return (
+      <p className="mt-2 text-xs text-white/70">
+        On iPhone: tap the Share icon → Add to Home Screen.
+      </p>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void triggerInstall()}
+      className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#001f6e] transition-colors hover:bg-white/90"
+    >
+      <Download className="size-4" aria-hidden="true" />
+      Install app
+    </button>
+  );
+}
+
 export function SideCards() {
   return (
     <div className="hidden flex-col gap-4 self-start 2xl:col-start-2 2xl:row-start-1 2xl:flex">
@@ -32,15 +63,7 @@ export function SideCards() {
         icon={<Smartphone className="size-[22px]" aria-hidden="true" />}
         title="Take Seyva with you"
         body="Install the app on your phone and manage your stokvel on the go — works offline, wherever you are."
-        cta={
-          <button
-            type="button"
-            className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#001f6e] transition-colors hover:bg-white/90"
-          >
-            <Download className="size-4" aria-hidden="true" />
-            Install app
-          </button>
-        }
+        cta={<InstallCta />}
         footer={
           <div className="flex items-center gap-2 pt-1 text-xs text-white/70">
             <WifiOff className="size-3.5" aria-hidden="true" />

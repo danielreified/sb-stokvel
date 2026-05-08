@@ -20,6 +20,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { MemberAvatar } from '../components/MemberAvatar.js';
 import { useCopy } from '../copy/index.js';
+import { useOnlineStatus } from '../lib/use-online-status.js';
 import { LanguageSwitcher } from './LanguageSwitcher.js';
 
 interface AppWindowProps {
@@ -56,6 +57,7 @@ export function AppWindow({ member, children }: AppWindowProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isWide = useMediaQuery('(min-width: 1536px)');
   const [sidebarOpen, setSidebarOpen] = useState(isWide);
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {
     setSidebarOpen(isWide);
@@ -157,8 +159,12 @@ export function AppWindow({ member, children }: AppWindowProps) {
               </span>
               <div className="ml-auto flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
-                  <span className="text-xs text-muted-foreground">{copy.status.online}</span>
+                  <div
+                    className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-amber-500'}`}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {isOnline ? copy.status.online : copy.status.offline}
+                  </span>
                 </div>
                 <LanguageSwitcher />
               </div>
