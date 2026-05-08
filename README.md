@@ -434,3 +434,31 @@ The PWA is a static build deployed to S3 + CloudFront. The BFF is a Bun-compiled
 Hashed assets are safe to cache forever — the filename changes with every build. `index.html` and the service worker must always be revalidated so the browser picks up new asset hashes and triggers the update prompt.
 
 **Kill switch.** To block clients below a given version, update `minVersion` in `apps/stokvel-api/src/config/versions.ts` and redeploy the BFF. To block all clients regardless of version, set `globalOverride: 'forced'` in the same file. This requires a BFF redeploy — it's a soft switch, not an instant kill. A production deployment would back this with a feature-flag service for runtime changes without a deploy.
+
+---
+
+## CI/CD
+
+Three GitHub Actions workflows, all path-filtered to `apps/stokvel-app/**`, `packages/**`, and `bun.lock`.
+
+**`ci.yml` — pull requests**
+Lint, typecheck, and unit tests run in parallel; build is blocked until all three pass. `VITE_API_BASE_URL` is injected from secrets so the PR build is identical to what ships. Concurrency is cancel-in-progress so fast-follow pushes don't queue.
+
+**`deploy.yml` — push to main**
+Same lint → typecheck → test → build chain, then S3 sync (`--delete` flag keeps the bucket clean) and a targeted CloudFront invalidation of `index.html`, `sw.js`, and `manifest.webmanifest` only — hashed assets are immutable and don't need invalidating. Deploy concurrency is `cancel-in-progress: false` so no push ever gets skipped. IAM is scoped to the minimum: S3 read/write on the site bucket and `cloudfront:CreateInvalidation` on that distribution only.
+
+**`release.yml` — versioning**
+release-please reads conventional commits and opens a release PR when warranted, bumping `package.json`, `CHANGELOG.md`, and the manifest. The version is embedded into the bundle at build time via `process.env.npm_package_version` → `__APP_VERSION__`, which the client sends on every `/api/app/version-check` call — that's how the kill switch knows whether to block a given client.
+
+**CDN cache headers**
+
+| Path | Cache-Control |
+|---|---|
+| `index.html`, `sw.js`, `manifest.webmanifest` | `no-cache` |
+| `assets/*` (hashed) | `public, max-age=31536000, immutable` |
+
+**What a production pipeline would add**
+A `lighthouserc.json` is already configured with score thresholds (performance ≥ 85, accessibility ≥ 90) — in production this gates PRs rather than running on demand. The Playwright E2E suite (`tests/e2e/`) covering auth, offline, IDB encryption, visual regression, and a11y would run the full browser matrix (Chromium, WebKit, Mobile Chrome, Mobile Safari) before deploy. BrowserStack or similar for real low-end Android — emulation doesn't capture the actual target device.
+
+**Production gap — BFF version injection**
+The BFF reads `process.env.APP_VERSION` to know what version to advertise in `X-Latest-Client-Version` headers and the version-check endpoint. In this demo it's set manually on the Lambda. In production the deploy step would write it to SSM after each frontend release and the BFF would read it on cold start. The kill-switch `minVersion` is intentionally hardcoded in `versions.ts` and requires a BFF redeploy — deliberate, documented in the [App update & kill switch](#app-update--kill-switch) section.
