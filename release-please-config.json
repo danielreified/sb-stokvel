@@ -1,0 +1,11 @@
+{
+  "packages": {
+    "apps/stokvel-app": {
+      "release-type": "node",
+      "package-name": "@seyva/stokvel-app",
+      "changelog-path": "apps/stokvel-app/CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    }
+  }
+}
