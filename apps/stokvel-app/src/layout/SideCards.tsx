@@ -1,5 +1,6 @@
 import { ArrowRight, Download, Info, Smartphone, WifiOff } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useInstallPrompt } from '../features/pwa/use-install-prompt.js';
 
 interface CardProps {
@@ -27,32 +28,41 @@ function GlassCard({ icon, title, body, cta, footer }: CardProps) {
 }
 
 /**
- * Install button. Three runtime states:
- *   - Chromium with beforeinstallprompt fired → triggers the native prompt.
- *   - Already-installed PWA → button hidden (appinstalled clears canInstall).
- *   - Browser without the event (Safari + iOS) → renders a hint instead of
- *     the button, since iOS install is manual via Share → Add to Home Screen.
+ * Install button. Always rendered. On Chromium with a captured
+ * beforeinstallprompt event the click triggers the native prompt; on
+ * Safari/iOS (which doesn't fire that event) the click reveals a hint
+ * with the share-sheet steps.
  */
-function InstallCta() {
+function InstallButton() {
   const { canInstall, triggerInstall } = useInstallPrompt();
+  const [showIosHint, setShowIosHint] = useState(false);
 
-  if (!canInstall) {
-    return (
-      <p className="mt-2 text-xs text-white/70">
-        On iPhone: tap the Share icon → Add to Home Screen.
-      </p>
-    );
+  async function onClick() {
+    const outcome = await triggerInstall();
+    if (outcome === 'unavailable') {
+      // No deferred prompt — most likely Safari/iOS where install is
+      // manual via Share → Add to Home Screen.
+      setShowIosHint(true);
+    }
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void triggerInstall()}
-      className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#001f6e] transition-colors hover:bg-white/90"
-    >
-      <Download className="size-4" aria-hidden="true" />
-      Install app
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => void onClick()}
+        className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#001f6e] transition-colors hover:bg-white/90"
+        aria-disabled={!canInstall && !showIosHint ? 'true' : undefined}
+      >
+        <Download className="size-4" aria-hidden="true" />
+        Install app
+      </button>
+      {showIosHint && (
+        <p className="text-xs text-white/80" role="status">
+          On iPhone: tap the Share icon → Add to Home Screen.
+        </p>
+      )}
+    </>
   );
 }
 
@@ -63,7 +73,7 @@ export function SideCards() {
         icon={<Smartphone className="size-[22px]" aria-hidden="true" />}
         title="Take Seyva with you"
         body="Install the app on your phone and manage your stokvel on the go — works offline, wherever you are."
-        cta={<InstallCta />}
+        cta={<InstallButton />}
         footer={
           <div className="flex items-center gap-2 pt-1 text-xs text-white/70">
             <WifiOff className="size-3.5" aria-hidden="true" />
