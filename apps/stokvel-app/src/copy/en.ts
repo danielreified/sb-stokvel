@@ -1,6 +1,6 @@
 /**
  * Central copy module for Seyva Stokvel (en-ZA locale).
- * All user-facing strings live here — never inline string literals in components.
+ * All user-facing strings live here — never inline literals in components.
  *
  * Structure: copy.<feature>.<key>
  * Placeholder syntax: "Hello, {name}" (use interpolate() from lib/copy-utils.ts)
