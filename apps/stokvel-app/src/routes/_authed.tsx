@@ -14,6 +14,7 @@ import { unwrapSessionKey } from '../lib/crypto/pin-wrap.js';
 import { wrappedKeyStore } from '../lib/crypto/wrapped-key-store.js';
 import { idbCache } from '../lib/persist/idb-cache.js';
 import { useIdleLock } from '../lib/use-idle-lock.js';
+import { useStandaloneDisplay } from '../lib/use-standalone-display.js';
 
 const IDLE_LOCK_MS = 60_000;
 const EVICTION_INTERVAL_MS = 60 * 60 * 1000;
@@ -116,22 +117,29 @@ function AuthedLayout() {
   // app shell before the lock decision is made).
   const showLock = !hasKey && wrappedBlobReady === true;
 
+  const isStandalone = useStandaloneDisplay();
+
+  // Bare AppWindow for installed PWA (no SB marketing chrome — feels
+  // native); MarketingShell-wrapped on the web tab where the demo wants
+  // to read like a Standard Bank product page.
+  const shell = (
+    <AppWindow member={member}>
+      <OfflineBanner />
+      <Outlet />
+      {showLock && (
+        <PinLockScreen
+          name={member?.name.split(' ')[0] ?? 'there'}
+          onVerify={handleVerify}
+          onSignOut={() => void signOut()}
+        />
+      )}
+    </AppWindow>
+  );
+
   return (
     <ForcedUpdateGate>
       <RecommendedUpdateBanner />
-      <MarketingShell>
-        <AppWindow member={member}>
-          <OfflineBanner />
-          <Outlet />
-          {showLock && (
-            <PinLockScreen
-              name={member?.name.split(' ')[0] ?? 'there'}
-              onVerify={handleVerify}
-              onSignOut={() => void signOut()}
-            />
-          )}
-        </AppWindow>
-      </MarketingShell>
+      {isStandalone ? shell : <MarketingShell>{shell}</MarketingShell>}
     </ForcedUpdateGate>
   );
 }
