@@ -14,9 +14,9 @@ the PWA at `https://dev.seyva.daniellourie.me`, the API at
 export TF_VAR_database_url='postgres://...'
 
 cd infrastructure/envs/dev
-terragrunt init
-terragrunt plan
-terragrunt apply
+terraform init
+terraform plan
+terraform apply
 ```
 
 ## What gets created

@@ -1,4 +1,4 @@
-# Re-exported so CI / scripts can read everything via `terragrunt output`
+# Re-exported so CI / scripts can read everything via `terraform output`
 # from this single stack root.
 
 output "site_url" {

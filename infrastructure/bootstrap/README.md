@@ -5,10 +5,9 @@ table that every other stack uses for its remote backend.
 
 ## Why a separate stack?
 
-Chicken-and-egg: the rest of the project's Terragrunt config wants an S3
-backend, but you can't store state in a bucket that doesn't exist yet. This
-stack creates the backend itself, with **local state**, run once per AWS
-account.
+Chicken-and-egg: every env stack uses an S3 backend, but you can't store
+state in a bucket that doesn't exist yet. This stack creates the backend
+itself, with **local state**, run once per AWS account.
 
 ## Apply
 
@@ -33,5 +32,6 @@ recovers cleanly (the resource names are deterministic from `name_prefix`).
 | DynamoDB table        | `seyva-stokvel-tflock`  |
 | DynamoDB PITR         | enabled                 |
 
-After this applies, the `infrastructure/terragrunt.hcl` `remote_state` block
-will find the bucket and start writing per-env state into it.
+After this applies, each env's `backend.tf` points at this bucket and
+DynamoDB table — `terraform init` in `envs/dev/` (or `envs/prod/`) writes
+per-env state into it.

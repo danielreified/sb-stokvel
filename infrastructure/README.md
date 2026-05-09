@@ -1,14 +1,13 @@
 # Infrastructure
 
-AWS infrastructure for the Seyva Stokvel demo. Terragrunt + Terraform,
+AWS infrastructure for the Seyva Stokvel demo. Plain Terraform,
 single-account, two envs (one active).
 
 ## Layout
 
 ```
 infrastructure/
-├── bootstrap/                # plain TF, one-shot. Creates the state backend.
-├── terragrunt.hcl            # ROOT: remote_state + provider generation.
+├── bootstrap/                # one-shot. Creates the S3 + DynamoDB state backend.
 ├── envs/
 │   ├── dev/                  # active env. Resources at seyva-dev-*
 │   └── prod/                 # placeholder. Activates by copying dev's .tf files.
@@ -18,11 +17,15 @@ infrastructure/
     └── api-lambda/           # Lambda + APIGW HTTP + ACM(regional) + R53.
 ```
 
+Each env owns its own `backend.tf` and `providers.tf` — there's no shared
+root config. State namespacing comes from the `key` set in each env's
+`backend.tf` (e.g. `envs/dev/terraform.tfstate`).
+
 ## Apply order — first time
 
 ```bash
 # 0. Tools
-brew install terraform terragrunt tflint trivy
+brew install terraform tflint trivy
 # (and AWS creds available — aws-vault, AWS_PROFILE, or OIDC role)
 
 # 1. Bootstrap the state backend (one-shot, local state, gitignored)
@@ -32,9 +35,9 @@ terraform init && terraform apply
 # 2. Apply the dev env (uses the S3 backend created above)
 cd ../envs/dev
 export TF_VAR_database_url='postgres://...'   # Neon URL — never commit
-terragrunt init
-terragrunt plan
-terragrunt apply
+terraform init
+terraform plan
+terraform apply
 
 # 3. Deploy the API code (placeholder zip → real Hono build)
 cd ../../..
@@ -45,7 +48,7 @@ cd ../../..
 
 ```bash
 # Re-apply infra after .tf changes
-cd infrastructure/envs/dev && terragrunt apply
+cd infrastructure/envs/dev && terraform apply
 
 # Lint + validate + security-scan everything
 bun run tf:check
@@ -54,7 +57,7 @@ bun run tf:check
 bun run tf:fmt
 
 # Tail Lambda logs
-aws logs tail "$(cd infrastructure/envs/dev && terragrunt output -raw api_log_group)" --follow
+aws logs tail "$(cd infrastructure/envs/dev && terraform output -raw api_log_group)" --follow
 
 # Deploy code only (no infra change)
 ./scripts/deploy-api.sh dev

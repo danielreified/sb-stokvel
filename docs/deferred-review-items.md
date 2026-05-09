@@ -93,17 +93,6 @@ even though the Neon path is the only one taken in Lambda.
 and have `lambda.ts` import only the Neon one. Or mark `pg` external in
 the bun build invocation and confirm Lambda's runtime ships it.
 
-### `check-terraform.sh` references terragrunt
-**Where:** `scripts/check-terraform.sh:57, 110-124`
-
-The repo deliberately ditched Terragrunt; this script still has a
-`terragrunt hclvalidate` block that prints "skipping" when the binary is
-missing. CI claiming "all checks passed" while skipping env validation
-is misleading.
-
-**Fix:** drop the terragrunt block; run `terraform validate` directly in
-each `infrastructure/envs/*` (now plain TF).
-
 ## Test gaps
 
 ### Zero auth tests

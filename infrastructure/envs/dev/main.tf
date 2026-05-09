@@ -5,7 +5,7 @@
 #   secrets → api → site
 #
 # Site doesn't depend on api, but lives in the same stack so that a single
-# `terragrunt apply` brings up the whole thing.
+# `terraform apply` brings up the whole thing.
 ###############################################################################
 
 # ---- Secrets (SSM SecureString, one module call per secret) ---------------

@@ -6,7 +6,7 @@
 # Run in CI:      same script, exits non-zero on any failure.
 #
 # Required tools (install once):
-#   brew install terraform terragrunt tflint trivy
+#   brew install terraform tflint trivy
 ###############################################################################
 
 set -euo pipefail
@@ -103,25 +103,13 @@ for d in infrastructure/modules/*/; do
   validate_dir "${d}"
 done
 
-# Bootstrap (plain TF, no terragrunt)
+# Bootstrap
 validate_dir infrastructure/bootstrap
 
-# Env stacks: validate via terragrunt to pick up the generated files
-section "terragrunt validate (envs)"
-if command -v terragrunt >/dev/null 2>&1; then
-  for d in infrastructure/envs/*/; do
-    printf '  %s ... ' "${d}"
-    if (cd "${d}" && terragrunt hclvalidate >/dev/null 2>&1); then
-      green "ok"
-    else
-      red "FAILED"
-      (cd "${d}" && terragrunt hclvalidate)
-      exit 1
-    fi
-  done
-else
-  yellow "terragrunt not installed — skipping env validation"
-fi
+# Env stacks (plain TF — each env owns its own backend.tf / providers.tf)
+for d in infrastructure/envs/*/; do
+  validate_dir "${d}"
+done
 
 # ---- 3. tflint ------------------------------------------------------------
 

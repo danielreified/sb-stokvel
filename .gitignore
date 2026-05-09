@@ -56,9 +56,8 @@ tests/e2e/**/*-win32.png
 dev-dist/
 playwright/.auth/
 
-# Terraform / Terragrunt
+# Terraform
 **/.terraform/
-**/.terragrunt-cache/
 **/.terraform-tmp/
 *.tfstate
 *.tfstate.*
